@@ -1,3 +1,4 @@
+import { error } from '@sveltejs/kit';
 import { PrismaClient, type Sales } from '@prisma/client'
 import dayjs from '$lib/dayjs';
 
@@ -33,13 +34,7 @@ export const GET = async () => {
             }
         },
         include: {
-            days: {
-                where: {
-                    endTime: {
-                        gte: today
-                    }
-                }
-            }
+            days: true
         },
     });
 
@@ -67,16 +62,8 @@ export const POST = async ({ request }) => {
         const { today } = getDates();
         setActive(sale, today);
 
-        return {
-            status: 201,
-            body: sale
-        }
-    } catch (error) {
-        return {
-            status: 400,
-            body: {
-                error: 'There was an error when creating the Sale'
-            }
-        }
+        return new Response(JSON.stringify(sale));
+    } catch (err) {
+        throw error(400);
     }
 }

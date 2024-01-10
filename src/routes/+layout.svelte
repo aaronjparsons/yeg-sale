@@ -1,8 +1,17 @@
-<script>
-import '@skeletonlabs/skeleton/themes/theme-skeleton.css';
-import '@skeletonlabs/skeleton/styles/skeleton.css';
+<script lang="ts">
 import '../app.postcss';
+import { Modal, initializeStores } from '@skeletonlabs/skeleton';
+import type { ModalComponent } from '@skeletonlabs/skeleton';
+import CreateSaleModal from '$lib/CreateSaleModal.svelte';
+
+initializeStores();
+
+const modalRegistry: Record<string, ModalComponent> = {
+	// Set a unique modal ID, then pass the component reference
+	createSaleModal: { ref: CreateSaleModal },
+};
 
 </script>
 
 <slot />
+<Modal components={modalRegistry} />

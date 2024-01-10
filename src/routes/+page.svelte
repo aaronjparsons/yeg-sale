@@ -1,25 +1,32 @@
 <script lang="ts">
-    import { Modal, modalStore } from '@skeletonlabs/skeleton';
-    import type { ModalSettings, ModalComponent } from '@skeletonlabs/skeleton';
+    import { setContext } from 'svelte';
+    import { getModalStore } from '@skeletonlabs/skeleton';
+    import type { ModalSettings } from '@skeletonlabs/skeleton';
     import Map, { addMarker } from '$lib/Map.svelte';
-    import CreateSaleModal from '$lib/CreateSaleModal.svelte';
 
     export let data = {
         sales: []
     };
 
+    setContext('APP', {
+        ...data
+    })
+
+    $: console.log(data)
+
+    const modalStore = getModalStore();
     const openCreateSaleModal = () => {
-        const modalComponent: ModalComponent = {
-            // Pass a reference to your custom component
-            ref: CreateSaleModal,
-            // Add your props as key/value pairs
-            props: {  },
-        };
-        const d: ModalSettings = {
+        const modal: ModalSettings = {
             type: 'component',
-            component: modalComponent
+            component: 'createSaleModal',
         };
-        modalStore.trigger(d);
+        modalStore.trigger(modal);
+    }
+
+    const handleNewSale = ({ detail }) => {
+        console.log('caught dispatch', detail)
+        data.sales = [...data.sales, detail];
+        addMarker(detail);
     }
 </script>
 
@@ -31,8 +38,7 @@
         Add Your Sale
     </button>
 </div>
-<Map data={data.sales} />
-<Modal />
+<Map />
 
 <style>
     :global(html, body) {

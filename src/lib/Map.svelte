@@ -1,4 +1,6 @@
 <script context="module" lang="ts">
+    import dayjs from '$lib/dayjs';
+
     let map: google.maps.Map;
     let activeSale: Sale | null = null;
 
@@ -8,11 +10,23 @@
             map: map,
             icon: sale.active ? 'green_marker.png' : 'yellow_marker.png'
         });
+
+        const today = dayjs();
+        const daysEls = sale.days.map((day: Day) => {
+            const start = dayjs(day.startTime);
+            const end = dayjs(day.endTime);
+            const classString = today.isSame(start, 'day') ? 'font-semibold' : '';
+            return `<p class="${classString}">${start.format('MMM D')}, ${start.format('h:mm a')} - ${end.format('h:mm a')}</p>`;
+        })
         const infowindow = new google.maps.InfoWindow({
             content: `
                 <p><span class="text-lg font-semibold">Address: </span>${sale.address}</p>
-                <p class="text-lg font-semibold">Days:</p>
-
+                <div class="flex">
+                    <p class="text-lg font-semibold">Days:</p>
+                    <div class="pt-2 ml-1">
+                        ${daysEls.join('')}
+                    </div>
+                </div>
             `,
         });
         infowindow.addListener('closeclick', ()=>{
@@ -34,7 +48,6 @@
             map.panTo(marker.getPosition());
         });
         marker.addListener('mouseover', () => {
-            console.log(isActiveSale(sale))
             if (isActiveSale(sale)) {
                 return;
             }
@@ -55,10 +68,10 @@
 
 <script lang="ts">
     import { Loader } from '@googlemaps/js-api-loader';
-    import { onMount } from 'svelte';
+    import { onMount, getContext } from 'svelte';
     import { sale } from '$lib/Store';
 
-    export let data: Sale[] = [];
+    const { sales } = getContext('APP');
 
     let mapEl : HTMLElement;
 
@@ -78,6 +91,9 @@
                 streetViewControl: false,
                 fullscreenControl: false,
                 mapTypeControl: false,
+                zoomControlOptions: {
+                    position: google.maps.ControlPosition.TOP_RIGHT,
+                },
                 styles: [
                     {
                         featureType: 'poi',
@@ -90,40 +106,43 @@
             });
 
             // ---- Markers ----
-            for (const sale of data) {
+            for (const sale of sales) {
                 addMarker(sale);
             }
 
             // ---- Search ----
             // Create a bounding box with sides ~10km away from the center point
-            const defaultBounds = {
-                north: center.lat + 0.1,
-                south: center.lat - 0.1,
-                east: center.lng + 0.1,
-                west: center.lng - 0.1,
-            };
-            const input = document.getElementById("pac-input") as HTMLInputElement;
-            const options = {
-                bounds: defaultBounds,
-                componentRestrictions: { country: 'ca' },
-                fields: ['formatted_address', 'geometry'],
-            };
+            // const defaultBounds = {
+            //     north: center.lat + 0.1,
+            //     south: center.lat - 0.1,
+            //     east: center.lng + 0.1,
+            //     west: center.lng - 0.1,
+            // };
+            // const input = document.getElementById("pac-input") as HTMLInputElement;
+            // const options = {
+            //     bounds: defaultBounds,
+            //     componentRestrictions: { country: 'ca' },
+            //     fields: ['formatted_address', 'geometry'],
+            // };
 
-            const autocomplete = new google.maps.places.Autocomplete(input, options);
-            autocomplete.addListener('place_changed', async () => {
-                const place = autocomplete.getPlace();
-                const formattedAddr = place.formatted_address?.replace(/\s[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d/, '');
+            // const autocomplete = new google.maps.places.Autocomplete(input, options);
+            // autocomplete.addListener('place_changed', async () => {
+            //     const place = autocomplete.getPlace();
+            //     const formattedAddr = place.formatted_address?.replace(/\s[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d/, '');
 
-                const data = {
-                    address: formattedAddr,
-                    lat: place.geometry?.location?.lat(),
-                    lng: place.geometry?.location?.lng(),
-                }
+            //     const data = {
+            //         address: formattedAddr,
+            //         lat: place.geometry?.location?.lat(),
+            //         lng: place.geometry?.location?.lng(),
+            //     }
 
-                sale.setAddress(data);
-            })
+            //     sale.setAddress(data);
+            // })
         });
     })
 </script>
 
-<div bind:this={mapEl} class="h-full w-full"></div>
+<div
+    bind:this={mapEl}
+    class="h-full w-full"
+></div>
