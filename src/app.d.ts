@@ -13,6 +13,7 @@ interface Sale {
     lat: number,
     lng: number,
     type: string,
+    tags: string[] | string,
     days: Day[]
     active?: boolean
     infowindow?: google.maps.InfoWindow

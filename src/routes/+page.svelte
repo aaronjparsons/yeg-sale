@@ -8,6 +8,7 @@
         sales: []
     };
 
+    // TODO: Might not need this as context anymore. Will leave for now just in case
     setContext('APP', {
         ...data
     })
@@ -21,12 +22,6 @@
             component: 'createSaleModal',
         };
         modalStore.trigger(modal);
-    }
-
-    const handleNewSale = ({ detail }) => {
-        console.log('caught dispatch', detail)
-        data.sales = [...data.sales, detail];
-        addMarker(detail);
     }
 </script>
 

@@ -8,23 +8,34 @@ const createSale = () => {
         lat: 0,
         lng: 0,
         type: 'yard',
+        tags: [],
         days
     });
 
     const createDay = (prevDay: Day|null = null): Day => {
         let newDate = prevDay
-            ? dayjs(prevDay?.date).add(1, 'day').format('YYYY-MM-DD')
-            : dayjs().format('YYYY-MM-DD')
-        return { date: newDate, startTime: '14:00', endTime: '20:00' };
+            ? dayjs(prevDay?.date).add(1, 'day')
+            : dayjs()
+        return { date: newDate.toDate(), startTime: '14:00', endTime: '20:00' };
     }
 
     const addDay = () => {
         update(s => {
-            const prevDay = s.days[days.length - 1];
+            const prevDay = s.days[s.days.length - 1];
             const newDay = createDay(prevDay);
             return {
                 ...s,
                 days: [...s.days, newDay]
+            }
+        });
+    }
+
+    const removeDay = (index: number) => {
+        update(s => {
+            s.days.splice(index, 1);
+            return {
+                ...s,
+                day: s.days
             }
         });
     }
@@ -50,6 +61,7 @@ const createSale = () => {
             lat: 0,
             lng: 0,
             type: 'yard',
+            tags: [],
             days: [firstDay]
         });
     }
@@ -59,6 +71,7 @@ const createSale = () => {
         set,
         reset,
         addDay,
+        removeDay,
         setAddress
     }
 }

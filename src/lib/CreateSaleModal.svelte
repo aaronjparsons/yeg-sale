@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount, createEventDispatcher, onDestroy } from 'svelte';
     import { getModalStore, Stepper, Step } from '@skeletonlabs/skeleton';
+    import { DateInput } from 'date-picker-svelte'
     import dayjs from '$lib/dayjs';
     import { sale } from '$lib/Store';
     import TimeSelect from '$lib/TimeSelect.svelte'
@@ -8,6 +9,11 @@
 
     let loading = false;
     const modalStore = getModalStore();
+
+    const tags = [
+        'Books', 'Food', 'Clothes', 'Toys', 'Tools', 'Furniture', 'Electronics', 'Baby Items',
+        'Collectibles',
+    ];
 
     onMount(() => {
         sale.reset();
@@ -47,22 +53,22 @@
         }
     })
 
-    const addDay = () => {
-        sale.addDay();
-    }
-
     const createNewSale = async () => {
         loading = true;
         const data = { ...$sale };
         for (const day of data.days) {
-            day.startTime = dayjs(`${day.date} ${day.startTime}`).toISOString();
-            day.endTime = dayjs(`${day.date} ${day.endTime}`).toISOString();
+            const dayString = dayjs(day.date).format('YYYY-MM-DD');
+            day.startTime = dayjs(`${dayString} ${day.startTime}`).toISOString();
+            day.endTime = dayjs(`${dayString} ${day.endTime}`).toISOString();
             delete day.date;
         }
 
+        // Convert tags to comma separated string
+        data.tags = data.tags.join(',');
+
         const response = await fetch('/sales', {
             method: 'POST',
-            body: JSON.stringify($sale)
+            body: JSON.stringify(data)
         });
         if (response.ok) {
             const newSale = await response.json() as Sale;
@@ -72,8 +78,7 @@
             const startTime = dayjs(newSale.days[0].startTime);
             if (today.diff(startTime, 'days') <= 7) {
                 // Is upcoming within 7 days, add it to data
-                //addMarker(newSale);
-                // TODO: Add new marker. just doing addMarker cause mouseover to not work
+                addMarker(newSale);
             }
             // TODO: Success msg
             // Close modal
@@ -84,22 +89,6 @@
         loading = false;
     }
 
-    const handleDateInput = (event: Event, index: number) => {
-        const target = event.target as HTMLInputElement;
-        $sale.days[index].date = target.value;
-
-        // Update min date of next day (if applicable)
-        const nextDay = $sale.days[index + 1];
-        if (nextDay) {
-            const minDate = getMinDate(index + 1);
-            const input = document.querySelector(`#date-input-${index + 1}`);
-            input?.setAttribute('min', minDate);
-            if (dayjs(nextDay.date).isSameOrBefore(dayjs(target.value))) {
-                $sale.days[index + 1].date = minDate;
-            }
-        }
-    }
-
     const getMinDate = (index: number) => {
         if (index > 0) {
             return dayjs($sale.days[index - 1].date).add(1, 'day').format('YYYY-MM-DD');
@@ -108,8 +97,20 @@
         }
     }
 
-    const onNextHandler = () => {}
-    const onCompleteHandler = () => {}
+    const handleTagClicked = (tag) => {
+        const tagIndex = $sale.tags.indexOf(tag);
+        if (tagIndex === -1) {
+            $sale.tags = [...$sale.tags, tag];
+        } else {
+            $sale.tags.splice(tagIndex, 1);
+            $sale.tags = $sale.tags;
+        }
+        console.log($sale)
+    }
+
+    const onCompleteHandler = () => {
+        createNewSale();
+    }
 
     const closeModal = () => {
         modalStore.close();
@@ -123,8 +124,8 @@
         </button>
     </div>
 
-    <Stepper on:next={onNextHandler} on:complete={onCompleteHandler}>
-        <Step>
+    <Stepper on:complete={onCompleteHandler}>
+        <Step locked={!Boolean($sale.address.length)}>
             <svelte:fragment slot="header">Add your upcoming sale to the map!</svelte:fragment>
             <label for="sale-type" class="label">
                 <span class="label-text">Sale Type</span>
@@ -156,49 +157,50 @@
                                 <span class="label-text">Day</span>
                             </label>
                         {/if}
-                        <input
-                            bind:value={day.date}
-                            type="date"
-                            class="input input-bordered p-2"
-                            min={getMinDate(index)}
-                            required
-                            on:input={(e) => handleDateInput(e, index)}
-                        />
+                        <DateInput bind:value={day.date} format="dd-MM-yyyy" />
                     </div>
                     <div class="flex-grow">
                         {#if index === 0}
                             <label for="start-time" class="label">
-                                <span class="label-text">Start Time</span>
+                                <span class="label-text">Start time</span>
                             </label>
                         {/if}
-                        <TimeSelect bind:value={ day.startTime } max={day.endTime} />
+                        <TimeSelect bind:value={day.startTime} max={day.endTime} />
                     </div>
                     <div class="flex-grow">
                         {#if index === 0}
                             <label for="end-time" class="label">
-                                <span class="label-text">End Time</span>
+                                <span class="label-text">End time</span>
                             </label>
                         {/if}
-                        <TimeSelect bind:value={ day.endTime } min={day.startTime} />
+                        <TimeSelect bind:value={day.endTime} min={day.startTime} />
                     </div>
                     {#if index > 0}
-                        <button class="btn-icon btn-icon-sm variant-filled-error text-white">✕</button>
+                        <button
+                            class="btn-icon btn-icon-sm variant-filled-error text-white"
+                            on:click={() => sale.removeDay(index)}
+                        >
+                            ✕
+                        </button>
+                    {:else}
+                        <span class="w-[33px]"></span>
                     {/if}
                 </div>
             {/each}
-            <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={addDay}>+ Add More Days</button>
+            <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={sale.addDay}>+ Add another day</button>
         </Step>
-        <Step>
+        <Step locked={loading}>
             <svelte:fragment slot="header">Add tags</svelte:fragment>
-            (tags)
+            <div class="flex flex-wrap gap-2">
+                {#each tags as tag}
+                    <span
+                        class="chip {$sale.tags.includes(tag) ? 'variant-filled' : 'variant-ghost'}"
+                        on:click={() => handleTagClicked(tag)}
+                    >
+                        {tag}
+                    </span>
+                {/each}
+            </div>
         </Step>
     </Stepper>
-
-    <!-- <form on:submit|preventDefault={createNewSale}>
-        <div class="flex justify-end mt-6">
-            <button type="submit" class="btn variant-filled" disabled={loading}>
-                {loading ? 'Saving...' : 'Add Sale'}
-            </button>
-        </div>
-    </form> -->
 </div>

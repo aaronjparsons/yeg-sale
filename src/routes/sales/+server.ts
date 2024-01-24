@@ -51,7 +51,7 @@ export const POST = async ({ request }) => {
     const sale = await request.json();
 
     try {
-        await prisma.sales.create({
+        const created = await prisma.sales.create({
             data: {
                 ...sale,
                 days: {
@@ -59,10 +59,22 @@ export const POST = async ({ request }) => {
                 }
             }
         });
-        const { today } = getDates();
-        setActive(sale, today);
 
-        return new Response(JSON.stringify(sale));
+
+        // Response does not contain "days", need to refetch to include all data
+        const response = await prisma.sales.findUnique({
+            where: {
+                id: created.id
+            },
+            include: {
+                days: true
+            },
+        });
+
+        const { today } = getDates();
+        setActive(response, today);
+
+        return new Response(JSON.stringify(response));
     } catch (err) {
         throw error(400);
     }
