@@ -77,3 +77,8 @@ const createSale = () => {
 }
 
 export const sale = createSale();
+
+export const filters = writable({
+    type: null,
+    tags: []
+})

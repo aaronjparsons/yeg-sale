@@ -4,3 +4,8 @@ export const SALE_TYPES = {
     estate: 'Estate Sale',
     antique: 'Antique Sale'
 }
+
+export const TAGS = [
+    'Antiques', 'Baby Items', 'Books/Media', 'Clothing', 'Collectibles',  'Electronics', 'Food',
+    'Furniture', 'Housewares', 'Sporting Goods', 'Toys', 'Tools',
+];

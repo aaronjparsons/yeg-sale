@@ -115,6 +115,7 @@
                 zoomControlOptions: {
                     position: google.maps.ControlPosition.TOP_RIGHT,
                 },
+                clickableIcons: false,
                 styles: [
                     {
                         featureType: 'poi',

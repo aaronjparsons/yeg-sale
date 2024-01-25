@@ -6,14 +6,10 @@
     import { sale } from '$lib/Store';
     import TimeSelect from '$lib/TimeSelect.svelte'
     import { addMarker } from './Map.svelte';
+    import { TAGS } from './utils';
 
     let loading = false;
     const modalStore = getModalStore();
-
-    const tags = [
-        'Books/Media', 'Food', 'Clothing', 'Toys', 'Tools', 'Furniture', 'Electronics', 'Baby Items',
-        'Collectibles', 'Housewares', 'Sporting Goods'
-    ];
 
     onMount(() => {
         sale.reset();
@@ -192,7 +188,7 @@
         <Step locked={loading}>
             <svelte:fragment slot="header">Add categories</svelte:fragment>
             <div class="flex flex-wrap gap-2">
-                {#each tags as tag}
+                {#each TAGS as tag}
                     <span
                         class="chip {$sale.tags.includes(tag) ? 'variant-filled' : 'variant-ghost'}"
                         on:click={() => handleTagClicked(tag)}
