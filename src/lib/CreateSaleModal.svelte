@@ -11,8 +11,8 @@
     const modalStore = getModalStore();
 
     const tags = [
-        'Books', 'Food', 'Clothes', 'Toys', 'Tools', 'Furniture', 'Electronics', 'Baby Items',
-        'Collectibles',
+        'Books/Media', 'Food', 'Clothing', 'Toys', 'Tools', 'Furniture', 'Electronics', 'Baby Items',
+        'Collectibles', 'Housewares', 'Sporting Goods'
     ];
 
     onMount(() => {
@@ -190,7 +190,7 @@
             <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={sale.addDay}>+ Add another day</button>
         </Step>
         <Step locked={loading}>
-            <svelte:fragment slot="header">Add tags</svelte:fragment>
+            <svelte:fragment slot="header">Add categories</svelte:fragment>
             <div class="flex flex-wrap gap-2">
                 {#each tags as tag}
                     <span

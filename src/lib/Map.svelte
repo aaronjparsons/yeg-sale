@@ -1,5 +1,6 @@
 <script context="module" lang="ts">
     import dayjs from '$lib/dayjs';
+    import { SALE_TYPES } from './utils';
 
     let map: google.maps.Map;
     let activeSale: Sale | null = null;
@@ -18,14 +19,34 @@
             const classString = today.isSame(start, 'day') ? 'font-semibold' : '';
             return `<p class="${classString}">${start.format('MMM D')}, ${start.format('h:mm a')} - ${end.format('h:mm a')}</p>`;
         })
+        const categories = sale.tags.split(',').map((category: string) => {
+            return `<span class="chip variant-filled">${category}</span>`;
+        })
         const infowindow = new google.maps.InfoWindow({
             content: `
-                <p><span class="text-lg font-semibold">Address: </span>${sale.address}</p>
-                <div class="flex">
-                    <p class="text-lg font-semibold">Days:</p>
-                    <div class="pt-2 ml-1">
-                        ${daysEls.join('')}
+                <p class="text-lg font-semibold mb-4">${SALE_TYPES[sale.type]}</p>
+                <div class="space-y-2 text-base">
+                    <div>
+                        <p class="font-semibold mr-1">Address: </p>
+                        <p class="ml-5">${sale.address}</p>
                     </div>
+
+                    <div>
+                        <p class="font-semibold mr-1">Days:</p>
+                        <div class="ml-5">
+                            ${daysEls.join('')}
+                        </div>
+                    </div>
+
+                    ${sale.tags.length
+                        ? `
+                            <div>
+                                <p class="font-semibold mr-1">Categories:</p>
+                                <div class="flex flex-wrap gap-2 ml-5 max-w-[400px]">${categories.join('')}</div>
+                            </div>
+                        `
+                        : ''
+                    }
                 </div>
             `,
         });
@@ -45,7 +66,7 @@
 
             infowindow.open(map, marker);
             activeSale = sale;
-            map.panTo(marker.getPosition());
+            map.panToWithOffset(marker.getPosition(), 0, -200);
         });
         marker.addListener('mouseover', () => {
             if (isActiveSale(sale)) {
@@ -87,7 +108,7 @@
             // ---- Map ----
             map = new google.maps.Map(mapEl, {
                 center,
-                zoom: 12,
+                zoom: window.innerWidth > 900 ? 12 : 10,
                 streetViewControl: false,
                 fullscreenControl: false,
                 mapTypeControl: false,
@@ -105,39 +126,25 @@
                 ]
             });
 
+            // ------ Add pan with offset method
+            map.panToWithOffset = function(latlng: google.maps.LatLng, offsetX = 0, offsetY = 0) {
+                const map = this;
+                const ov = new google.maps.OverlayView();
+                ov.onAdd = function() {
+                    const proj = this.getProjection();
+                    const aPoint: google.maps.Point = proj.fromLatLngToContainerPixel(latlng);
+                    aPoint.x = aPoint.x + offsetX;
+                    aPoint.y = aPoint.y + offsetY;
+                    map.panTo(proj.fromContainerPixelToLatLng(aPoint));
+                };
+                ov.draw = function() {};
+                ov.setMap(this);
+            };
+
             // ---- Markers ----
             for (const sale of sales) {
                 addMarker(sale);
             }
-
-            // ---- Search ----
-            // Create a bounding box with sides ~10km away from the center point
-            // const defaultBounds = {
-            //     north: center.lat + 0.1,
-            //     south: center.lat - 0.1,
-            //     east: center.lng + 0.1,
-            //     west: center.lng - 0.1,
-            // };
-            // const input = document.getElementById("pac-input") as HTMLInputElement;
-            // const options = {
-            //     bounds: defaultBounds,
-            //     componentRestrictions: { country: 'ca' },
-            //     fields: ['formatted_address', 'geometry'],
-            // };
-
-            // const autocomplete = new google.maps.places.Autocomplete(input, options);
-            // autocomplete.addListener('place_changed', async () => {
-            //     const place = autocomplete.getPlace();
-            //     const formattedAddr = place.formatted_address?.replace(/\s[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d/, '');
-
-            //     const data = {
-            //         address: formattedAddr,
-            //         lat: place.geometry?.location?.lat(),
-            //         lng: place.geometry?.location?.lng(),
-            //     }
-
-            //     sale.setAddress(data);
-            // })
         });
     })
 </script>
