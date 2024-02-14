@@ -20,6 +20,7 @@ model Sales {
     tags            String?   @db.VarChar(255)
     type            String    @db.VarChar(255)
     days            Days[]
+    session         String    @db.VarChar(255)
 }
 
 model Days {

@@ -20,7 +20,14 @@ const setActive = (sale: any, today: string) => {
     }
 }
 
-export const GET = async () => {
+const setOwned = (sale: any, session: string) => {
+    const saleSession = sale.session;
+    delete sale.session;
+    sale.owned = saleSession === session;
+}
+
+export const GET = async ({ cookies }) => {
+    const session = cookies.get('session');
     const { today, weekAhead } = getDates();
     const response = await prisma.sales.findMany({
         where: {
@@ -40,6 +47,7 @@ export const GET = async () => {
 
     for (const sale of response) {
         setActive(sale, today);
+        setOwned(sale, session);
     }
 
     return new Response(JSON.stringify({
@@ -47,13 +55,15 @@ export const GET = async () => {
     }));
 }
 
-export const POST = async ({ request }) => {
+export const POST = async ({ request, cookies }) => {
     const sale = await request.json();
+    const session = cookies.get('session');
 
     try {
         const created = await prisma.sales.create({
             data: {
                 ...sale,
+                session,
                 days: {
                     create: sale.days
                 }

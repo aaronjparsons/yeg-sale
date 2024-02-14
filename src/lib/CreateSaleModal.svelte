@@ -93,7 +93,7 @@
         }
     }
 
-    const handleTagClicked = (tag) => {
+    const handleTagClicked = (tag: string) => {
         const tagIndex = $sale.tags.indexOf(tag);
         if (tagIndex === -1) {
             $sale.tags = [...$sale.tags, tag];

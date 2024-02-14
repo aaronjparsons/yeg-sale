@@ -33,6 +33,7 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.2",
     "@prisma/client": "^5.1.1",
-    "dayjs": "^1.11.9"
+    "dayjs": "^1.11.9",
+    "uuid": "^9.0.1"
   }
 }
