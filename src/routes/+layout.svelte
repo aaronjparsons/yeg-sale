@@ -1,6 +1,6 @@
 <script lang="ts">
 import '../app.postcss';
-import { Modal, initializeStores } from '@skeletonlabs/skeleton';
+import { Modal, Toast, initializeStores } from '@skeletonlabs/skeleton';
 import type { ModalComponent } from '@skeletonlabs/skeleton';
 import CreateSaleModal from '$lib/CreateSaleModal.svelte';
 import OptionsModal from '$lib/OptionsModal.svelte';
@@ -17,3 +17,4 @@ const modalRegistry: Record<string, ModalComponent> = {
 
 <slot />
 <Modal components={modalRegistry} />
+<Toast />

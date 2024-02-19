@@ -4,6 +4,7 @@
 
     let map: google.maps.Map;
     let activeSale: Sale | null = null;
+    const markers = {};
 
     export const addMarker = (sale: Sale) => {
         const marker = new google.maps.Marker({
@@ -47,6 +48,15 @@
                         `
                         : ''
                     }
+
+                    ${sale.owned
+                        ? `
+                            <div class="flex justify-end gap-2">
+                                <button onclick="deleteSale(${sale.id})" class="btn btn-sm variant-filled-error">Delete</button>
+                            </div>
+                        `
+                        : ''
+                    }
                 </div>
             `,
         });
@@ -80,6 +90,8 @@
             }
             infowindow.close();
         })
+
+        markers[sale.id] = marker;
     }
 
     const isActiveSale = (sale: Sale) => {
@@ -90,10 +102,11 @@
 <script lang="ts">
     import { Loader } from '@googlemaps/js-api-loader';
     import { onMount, getContext } from 'svelte';
+    import { getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
     import { sale } from '$lib/Store';
 
     const { sales } = getContext('APP');
-
+    const toastStore = getToastStore();
     let mapEl : HTMLElement;
 
     onMount(() => {
@@ -147,6 +160,29 @@
                 addMarker(sale);
             }
         });
+
+        window.deleteSale = async (id: number, marker: any) => {
+            console.warn(id, markers);
+
+            const response = await fetch(`/sales/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                const marker = markers[id];
+                marker.setMap(null);
+                const toast: ToastSettings = {
+                    message: 'Sale deleted',
+                };
+                toastStore.trigger(toast);
+            } else {
+                const toast: ToastSettings = {
+                    message: 'Error deleting sale',
+                    background: 'variant-filled-error',
+                };
+                toastStore.trigger(toast);
+            }
+        }
     })
 </script>
 

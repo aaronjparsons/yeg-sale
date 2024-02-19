@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, createEventDispatcher, onDestroy } from 'svelte';
-    import { getModalStore, Stepper, Step } from '@skeletonlabs/skeleton';
+    import { getModalStore, Stepper, Step, getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
     import { DateInput } from 'date-picker-svelte'
     import dayjs from '$lib/dayjs';
     import { sale } from '$lib/Store';
@@ -10,6 +10,7 @@
 
     let loading = false;
     const modalStore = getModalStore();
+    const toastStore = getToastStore();
 
     onMount(() => {
         sale.reset();
@@ -76,11 +77,19 @@
                 // Is upcoming within 7 days, add it to data
                 addMarker(newSale);
             }
-            // TODO: Success msg
+            // TODO: Success msg if sale is more than 7 days out?
+            const toast: ToastSettings = {
+                message: 'Sale created',
+            };
+            toastStore.trigger(toast);
             // Close modal
             closeModal();
         } else {
-            // TODO: Handle error
+            const toast: ToastSettings = {
+                message: 'Error creating sale',
+                background: 'variant-filled-error',
+            };
+            toastStore.trigger(toast);
         }
         loading = false;
     }

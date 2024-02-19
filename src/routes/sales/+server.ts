@@ -13,7 +13,7 @@ const getDates = () => {
 
 const setActive = (sale: any, today: string) => {
     const startTime = dayjs(sale.days[0].startTime);
-    if (startTime.isSameOrBefore(today)) {
+    if (startTime.isSameOrBefore(today, 'day')) {
         sale.active = true;
     } else {
         sale.active = false;
@@ -83,9 +83,11 @@ export const POST = async ({ request, cookies }) => {
 
         const { today } = getDates();
         setActive(response, today);
+        setOwned(sale, session);
 
         return new Response(JSON.stringify(response));
     } catch (err) {
+        console.log(err)
         throw error(400);
     }
 }
