@@ -1,10 +1,33 @@
 <script context="module" lang="ts">
+    import { get } from 'svelte/store';
     import dayjs from '$lib/dayjs';
-    import { SALE_TYPES } from './utils';
+    import { Filters } from '$lib/Store';
+    import { SALE_TYPES, hasIntersection } from './utils';
 
     let map: google.maps.Map;
     let activeSale: Sale | null = null;
     const markers = {};
+
+    export const filterMapMarkers = () => {
+        const filters = get(Filters);
+        for (const marker of Object.values(markers)) {
+            // Tags
+            if (filters.tags.length) {
+                const saleTags = marker.sale.tags.split(',');
+                if (hasIntersection(saleTags, filters.tags)) {
+                    marker.setMap(map);
+                } else {
+                    marker.setMap(null);
+                }
+            }
+        }
+    }
+
+    export const resetMapMarkers = () => {
+        for (const marker of Object.values(markers)) {
+            marker.setMap(map);
+        }
+    }
 
     export const addMarker = (sale: Sale) => {
         const marker = new google.maps.Marker({
@@ -12,6 +35,7 @@
             map: map,
             icon: sale.active ? 'green_marker.png' : 'yellow_marker.png'
         });
+        marker.sale = sale;
 
         const today = dayjs();
         const daysEls = sale.days.map((day: Day) => {
@@ -101,11 +125,10 @@
 
 <script lang="ts">
     import { Loader } from '@googlemaps/js-api-loader';
-    import { onMount, getContext } from 'svelte';
+    import { onMount } from 'svelte';
     import { getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
-    import { sale } from '$lib/Store';
+    import { Sales } from '$lib/Store';
 
-    const { sales } = getContext('APP');
     const toastStore = getToastStore();
     let mapEl : HTMLElement;
 
@@ -156,14 +179,12 @@
             };
 
             // ---- Markers ----
-            for (const sale of sales) {
+            for (const sale of $Sales) {
                 addMarker(sale);
             }
         });
 
         window.deleteSale = async (id: number, marker: any) => {
-            console.warn(id, markers);
-
             const response = await fetch(`/sales/${id}`, {
                 method: 'DELETE'
             });

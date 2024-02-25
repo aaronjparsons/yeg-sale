@@ -83,7 +83,7 @@ export const POST = async ({ request, cookies }) => {
 
         const { today } = getDates();
         setActive(response, today);
-        setOwned(sale, session);
+        setOwned(response, session);
 
         return new Response(JSON.stringify(response));
     } catch (err) {

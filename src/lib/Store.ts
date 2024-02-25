@@ -1,6 +1,8 @@
 import { writable, get } from "svelte/store";
 import dayjs from '$lib/dayjs';
 
+export const Sales = writable([]);
+
 const createSale = () => {
     const days: Day[] = [];
     const { subscribe, set, update } = writable({
@@ -78,7 +80,24 @@ const createSale = () => {
 
 export const sale = createSale();
 
-export const filters = writable({
-    type: null,
-    tags: []
-})
+const createFilters = () => {
+    const { subscribe, set, update } = writable({
+        type: null,
+        tags: []
+    })
+
+    const reset = () => {
+        set({
+            type: null,
+            tags: []
+        })
+    }
+
+    return {
+        subscribe,
+        set,
+        reset
+    }
+}
+
+export const Filters = createFilters();

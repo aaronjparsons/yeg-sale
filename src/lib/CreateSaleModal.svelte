@@ -110,7 +110,6 @@
             $sale.tags.splice(tagIndex, 1);
             $sale.tags = $sale.tags;
         }
-        console.log($sale)
     }
 
     const onCompleteHandler = () => {
@@ -194,7 +193,7 @@
             {/each}
             <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={sale.addDay}>+ Add another day</button>
         </Step>
-        <Step locked={loading}>
+        <Step locked={loading || !$sale.tags.length}>
             <svelte:fragment slot="header">Add categories</svelte:fragment>
             <div class="flex flex-wrap gap-2">
                 {#each TAGS as tag}
