@@ -35,6 +35,14 @@
         modalStore.trigger(modal);
     }
 
+    const openLegendModal = () => {
+        const modal: ModalSettings = {
+            type: 'component',
+            component: 'legendModal',
+        };
+        modalStore.trigger(modal);
+    }
+
     $: hasFilters = Object.values($Filters).some(f => f?.length > 0)
 </script>
 
@@ -50,6 +58,12 @@
         </svg>
         Create sale
     </button>
+    <button type="button" class="flex btn variant-filled" on:click={openLegendModal}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+        </svg>
+        Legend
+    </button>
     <div class="relative inline-block">
         {#if hasFilters}
             <span class="badge-icon variant-filled-success absolute -top-1 -right-1 z-10 pointer-events-none">
@@ -62,7 +76,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
             </svg>
-            Options
+            Filters
         </button>
     </div>
 </div>
@@ -71,6 +85,16 @@
 <div class="absolute bottom-5 right-5 z-10 block sm:hidden">
     {#if showMenuBtns}
         <div transition:fly={{ y: 70 }} class="flex flex-col items-center space-y-2 mb-2">
+            <button type="button" class="btn-icon variant-filled" on:click={openCreateSaleModal}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+            </button>
+            <button type="button" class="btn-icon variant-filled" on:click={openLegendModal}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                </svg>
+            </button>
             <div class="relative inline-block">
                 {#if hasFilters}
                     <span class="badge-icon variant-filled-success absolute -top-1 -right-1 z-10 pointer-events-none">
@@ -85,11 +109,6 @@
                     </svg>
                 </button>
             </div>
-            <button type="button" class="btn-icon variant-filled" on:click={openCreateSaleModal}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-            </button>
         </div>
     {/if}
     <div class="relative inline-block">

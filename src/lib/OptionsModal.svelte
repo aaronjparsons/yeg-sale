@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { filter, getModalStore } from '@skeletonlabs/skeleton';
-    import { TAGS } from './utils';
+    import { getModalStore, SlideToggle } from '@skeletonlabs/skeleton';
+    import { TAGS, SALE_TYPES } from './utils';
     import { Filters } from './Store';
     import { filterMapMarkers, resetMapMarkers } from './Map.svelte';
 
@@ -33,32 +33,33 @@
         modalStore.close();
     }
 
-    $: hasFilters = Object.values(localFilters).some(f => f?.length > 0);
+    $: hasFilters = Object.values(localFilters).some(f => {
+        return Array.isArray(f)
+            ? f.length > 0
+            : f
+    });
 </script>
 
 <div class="relative card w-modal p-4 shadow-lg">
-    <div class="flex justify-end">
+    <div class="flex justify-between mb-4">
+        <p class="font-semibold text-2xl">Filters</p>
         <button class="btn-icon btn-icon-sm" on:click={closeModal}>
             ✕
         </button>
     </div>
     <div class="space-y-4">
+        <SlideToggle name="slider-label" size="sm" bind:checked={localFilters.onlyActive}>Show only active sales</SlideToggle>
         <div>
-            <p class="font-semibold text-2xl">Legend</p>
-            <div class="flex flex-col gap-2">
-                <div class="flex items-center">
-                    <img class="h-6 mr-2" src="./green_marker.png" alt="Green map marker (active)" />
-                    <p>Sales active today</p>
-                </div>
-                <div class="flex items-center">
-                    <img class="h-6 mr-2" src="./yellow_marker.png" alt="Green map marker (active)" />
-                    <p>Upcoming sales</p>
-                </div>
-            </div>
+            <span class="font-semibold">Type:</span>
+            <select bind:value={localFilters.type} id="sale-type" class="select select-bordered w-full">
+                <option value={null}>Any</option>
+                {#each Object.entries(SALE_TYPES) as [key, value]}
+                    <option value={key}>{value}</option>
+                {/each}
+            </select>
         </div>
         <div>
-            <p class="font-semibold text-2xl">Filters</p>
-            <span class="label-text">Categories</span>
+            <span class="font-semibold">Categories:</span>
             <div class="flex flex-wrap gap-2">
                 {#each TAGS as tag}
                     <span

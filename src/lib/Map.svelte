@@ -11,15 +11,29 @@
     export const filterMapMarkers = () => {
         const filters = get(Filters);
         for (const marker of Object.values(markers)) {
+            // Active
+            if (filters.onlyActive && !marker.sale.active) {
+                marker.setMap(null);
+                continue;
+            }
+
+            // Type
+            if (filters.type && marker.sale.type !== filters.type) {
+                marker.setMap(null);
+                continue;
+            }
+
             // Tags
             if (filters.tags.length) {
                 const saleTags = marker.sale.tags.split(',');
-                if (hasIntersection(saleTags, filters.tags)) {
-                    marker.setMap(map);
-                } else {
+                if (!hasIntersection(saleTags, filters.tags)) {
                     marker.setMap(null);
+                    continue;
                 }
             }
+
+            // Matches filters, make sure map is set
+            marker.setMap(map);
         }
     }
 
@@ -49,6 +63,7 @@
         })
         const infowindow = new google.maps.InfoWindow({
             content: `
+                <p class="text-lg font-semibold mb-4">${SALE_TYPES[sale.type]}</p>
                 <div class="space-y-2 text-base">
                     <div>
                         <p class="font-semibold mr-1">Address: </p>

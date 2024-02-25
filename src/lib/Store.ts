@@ -9,7 +9,7 @@ const createSale = () => {
         address: '',
         lat: 0,
         lng: 0,
-        // type: 'yard',
+        type: 'yard',
         tags: [],
         days
     });
@@ -62,7 +62,7 @@ const createSale = () => {
             address: '',
             lat: 0,
             lng: 0,
-            // type: 'yard',
+            type: 'yard',
             tags: [],
             days: [firstDay]
         });
@@ -82,11 +82,15 @@ export const sale = createSale();
 
 const createFilters = () => {
     const { subscribe, set, update } = writable({
+        onlyActive: false,
+        type: null,
         tags: []
     })
 
     const reset = () => {
         set({
+            onlyActive: false,
+            type: null,
             tags: []
         })
     }

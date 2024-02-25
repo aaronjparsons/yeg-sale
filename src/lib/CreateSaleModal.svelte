@@ -6,7 +6,7 @@
     import { sale } from '$lib/Store';
     import TimeSelect from '$lib/TimeSelect.svelte'
     import { addMarker } from './Map.svelte';
-    import { TAGS } from './utils';
+    import { TAGS, SALE_TYPES } from './utils';
 
     let loading = false;
     const modalStore = getModalStore();
@@ -131,15 +131,14 @@
     <Stepper on:complete={onCompleteHandler}>
         <Step locked={!Boolean($sale.address.length)}>
             <svelte:fragment slot="header">Add your upcoming sale to the map!</svelte:fragment>
-            <!-- <label for="sale-type" class="label">
+            <label for="sale-type" class="label">
                 <span class="label-text">Sale Type</span>
                 <select bind:value={$sale.type} id="sale-type" class="select select-bordered w-full">
-                    <option value="yard">Yard Sale</option>
-                    <option value="garage">Garage Sale</option>
-                    <option value="estate">Estate Sale</option>
-                    <option value="antique">Antique Sale</option>
+                    {#each Object.entries(SALE_TYPES) as [key, value]}
+                        <option value={key}>{value}</option>
+                    {/each}
                 </select>
-            </label> -->
+            </label>
             <label for="pac-input" class="label">
                 <span class="label-text">Address</span>
                 <input
