@@ -18,7 +18,7 @@ model Sales {
     lat             Float     @db.Float
     lng             Float     @db.Float
     tags            String?   @db.VarChar(255)
-    type            String    @db.VarChar(255)
+    // type            String    @db.VarChar(255)
     days            Days[]
     session         String    @db.VarChar(255)
 }

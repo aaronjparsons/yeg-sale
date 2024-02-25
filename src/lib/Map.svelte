@@ -49,7 +49,6 @@
         })
         const infowindow = new google.maps.InfoWindow({
             content: `
-                <p class="text-lg font-semibold mb-4">${SALE_TYPES[sale.type]}</p>
                 <div class="space-y-2 text-base">
                     <div>
                         <p class="font-semibold mr-1">Address: </p>
