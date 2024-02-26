@@ -2,55 +2,52 @@
     import { get } from 'svelte/store';
     import dayjs from '$lib/dayjs';
     import { Filters } from '$lib/Store';
-    import { SALE_TYPES, hasIntersection } from './utils';
+    import { MARKERS, SALE_TYPES, hasIntersection } from './utils';
 
     let map: google.maps.Map;
     let activeSale: Sale | null = null;
     const markers = {};
 
-    export const filterMapMarkers = () => {
-        const filters = get(Filters);
-        for (const marker of Object.values(markers)) {
-            // Active
-            if (filters.onlyActive && !marker.sale.active) {
-                marker.setMap(null);
-                continue;
-            }
-
-            // Type
-            if (filters.type && marker.sale.type !== filters.type) {
-                marker.setMap(null);
-                continue;
-            }
-
-            // Tags
-            if (filters.tags.length) {
-                const saleTags = marker.sale.tags.split(',');
-                if (!hasIntersection(saleTags, filters.tags)) {
-                    marker.setMap(null);
-                    continue;
-                }
-            }
-
-            // Matches filters, make sure map is set
-            marker.setMap(map);
-        }
-    }
-
-    export const resetMapMarkers = () => {
-        for (const marker of Object.values(markers)) {
-            marker.setMap(map);
-        }
-    }
-
-    export const addMarker = (sale: Sale) => {
-        const marker = new google.maps.Marker({
-            position: { lat: Number(sale.lat), lng: Number(sale.lng) },
-            map: map,
-            icon: sale.active ? 'green_marker.png' : 'yellow_marker.png'
+    const buildPermanentSaleInfowindow = (sale: Market) => {
+        const today = dayjs();
+        const daysEls = sale.days.split(',').map((day: Day) => {
+            return `<p>${day}</p>`;
+        })
+        const infowindow = new google.maps.InfoWindow({
+            content: `
+                <p class="text-lg font-semibold mb-4">${sale.displayName}</p>
+                <div class="space-y-2 text-base">
+                    <div>
+                        <p class="font-semibold mr-1">Address: </p>
+                        <p class="ml-5">${sale.address}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold mr-1">Website: </p>
+                        <a class="ml-5 text-blue-600 visited:text-purple-600" href=${sale.link} target="_blank">${sale.link}</a>
+                    </div>
+                    <div>
+                        <p class="font-semibold mr-1">Open: </p>
+                        <p class="ml-5">${sale.open}</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold mr-1">Days:</p>
+                        <div class="ml-5">
+                            ${daysEls.join('')}
+                        </div>
+                    </div>
+                </div>
+            `,
         });
-        marker.sale = sale;
+        infowindow.addListener('closeclick', ()=>{
+            if (isActiveSale(sale)) {
+                activeSale = null;
+            }
+        });
 
+        return infowindow;
+    }
+
+    const buildCustomSaleInfowindow = (sale: Sale) => {
         const today = dayjs();
         const daysEls = sale.days.map((day: Day) => {
             const start = dayjs(day.startTime);
@@ -103,6 +100,62 @@
                 activeSale = null;
             }
         });
+
+        return infowindow;
+    }
+
+    export const filterMapMarkers = () => {
+        const filters = get(Filters);
+        for (const marker of Object.values(markers)) {
+            // Active
+            if (filters.onlyActive && !marker.sale.active) {
+                marker.setMap(null);
+                continue;
+            }
+
+            // Type
+            if (filters.type && marker.sale.type !== filters.type) {
+                marker.setMap(null);
+                continue;
+            }
+
+            // Tags
+            if (filters.tags.length) {
+                const saleTags = marker.sale.tags.split(',');
+                if (!hasIntersection(saleTags, filters.tags)) {
+                    marker.setMap(null);
+                    continue;
+                }
+            }
+
+            // Matches filters, make sure map is set
+            marker.setMap(map);
+        }
+    }
+
+    export const resetMapMarkers = () => {
+        for (const marker of Object.values(markers)) {
+            marker.setMap(map);
+        }
+    }
+
+    export const addMarker = (sale: Sale) => {
+        const icon = sale.type === 'permanent'
+                ? MARKERS.permanent
+                : sale.active ? MARKERS.active : MARKERS.upcoming
+        icon.anchor = new google.maps.Point(0, 20);
+
+        const marker = new google.maps.Marker({
+            position: { lat: Number(sale.lat), lng: Number(sale.lng) },
+            map: map,
+            icon
+        });
+        marker.sale = sale;
+
+        const infowindow = sale.type === 'permanent'
+            ? buildPermanentSaleInfowindow(sale)
+            : buildCustomSaleInfowindow(sale);
+
         sale.infowindow = infowindow;
 
         marker.addListener('click', () => {

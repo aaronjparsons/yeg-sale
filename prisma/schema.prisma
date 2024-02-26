@@ -12,23 +12,36 @@ datasource db {
 }
 
 model Sales {
-    id              Int       @default(autoincrement()) @id
-    createdAt       DateTime  @default(now())
-    address         String    @db.VarChar(255)
-    lat             Float     @db.Float
-    lng             Float     @db.Float
-    tags            String?   @db.VarChar(255)
-    type            String    @db.VarChar(255)
-    days            Days[]
-    session         String    @db.VarChar(255)
+  id              Int       @default(autoincrement()) @id
+  createdAt       DateTime  @default(now())
+  address         String    @db.VarChar(255)
+  lat             Float     @db.Float
+  lng             Float     @db.Float
+  tags            String?   @db.VarChar(255)
+  type            String    @db.VarChar(255)
+  days            Days[]
+  session         String    @db.VarChar(255)
 }
 
 model Days {
-    id              Int       @default(autoincrement()) @id
-    sale            Sales     @relation(fields: [saleId], references: [id])
-    saleId          Int
-    startTime       DateTime
-    endTime         DateTime
+  id              Int       @default(autoincrement()) @id
+  sale            Sales     @relation(fields: [saleId], references: [id])
+  saleId          Int
+  startTime       DateTime
+  endTime         DateTime
 
-    @@index([saleId])
+  @@index([saleId])
+}
+
+model Markets {
+  id              Int       @default(autoincrement()) @id
+  name            String    @unique @db.VarChar(255)
+  displayName     String    @db.VarChar(255)
+  address         String    @db.VarChar(255)
+  lat             Float     @db.Float
+  lng             Float     @db.Float
+  type            String    @db.VarChar(255)
+  link            String    @db.VarChar(255)
+  open            String    @db.VarChar(255)
+  days            String    @db.VarChar(255)
 }

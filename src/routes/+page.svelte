@@ -7,10 +7,11 @@
     import { Sales, Filters } from '$lib/Store';
 
     export let data = {
-        sales: []
+        sales: [],
+        markets: []
     };
 
-    $Sales = data.sales;
+    $Sales = [...data.sales, ...data.markets];
 
     const modalStore = getModalStore();
     let showMenuBtns = false;

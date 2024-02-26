@@ -27,3 +27,18 @@ interface Day {
     endTime: string
 }
 
+interface Market {
+    id?: number,
+    address: string,
+    name: string,
+    displayName: string,
+    lat: number,
+    lng: number,
+    type: string,
+    open: string,
+    days: string,
+    link: string,
+    infowindow?: google.maps.InfoWindow
+}
+
+

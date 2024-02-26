@@ -29,30 +29,38 @@ const setOwned = (sale: any, session: string) => {
 export const GET = async ({ cookies }) => {
     const session = cookies.get('session');
     const { today, weekAhead } = getDates();
-    const response = await prisma.sales.findMany({
-        where: {
-            days: {
-                some: {
-                    endTime: { // TODO: Should this be startTime???
-                        gte: today,
-                        lt: weekAhead
+    try {
+        const markets = await prisma.markets.findMany();
+
+        const response = await prisma.sales.findMany({
+            where: {
+                days: {
+                    some: {
+                        endTime: { // TODO: Should this be startTime???
+                            gte: today,
+                            lt: weekAhead
+                        }
                     }
                 }
-            }
-        },
-        include: {
-            days: true
-        },
-    });
+            },
+            include: {
+                days: true
+            },
+        });
 
-    for (const sale of response) {
-        setActive(sale, today);
-        setOwned(sale, session);
+        for (const sale of response) {
+            setActive(sale, today);
+            setOwned(sale, session);
+        }
+
+        return new Response(JSON.stringify({
+            sales: response,
+            markets
+        }));
+    } catch (err) {
+        console.log(err)
+        throw error(err?.status || 400);
     }
-
-    return new Response(JSON.stringify({
-        sales: response
-    }));
 }
 
 export const POST = async ({ request, cookies }) => {
@@ -88,6 +96,6 @@ export const POST = async ({ request, cookies }) => {
         return new Response(JSON.stringify(response));
     } catch (err) {
         console.log(err)
-        throw error(400);
+        throw error(err?.status || 400);
     }
 }

@@ -12,7 +12,8 @@ export const load = async ({ fetch, cookies }) => {
         const res = await response.json();
 
         return {
-            sales: res.sales
+            sales: res.sales,
+            markets: res.markets
         };
     }
 }
