@@ -44,7 +44,11 @@
         modalStore.trigger(modal);
     }
 
-    $: hasFilters = Object.values($Filters).some(f => f?.length > 0)
+    $: hasFilters = Object.values($Filters).some(f => {
+        return Array.isArray(f)
+            ? f.length > 0
+            : f
+    });
 </script>
 
 <div class="absolute top-2 left-2 w-32 sm:top-5 sm:left-5 sm:w-auto z-10">

@@ -1,5 +1,8 @@
 <script lang="ts">
     import { getModalStore } from '@skeletonlabs/skeleton';
+    import ActiveSVG from './ActiveSVG.svelte';
+    import UpcomingSVG from './UpcomingSVG.svelte';
+    import MarketSvg from './MarketSVG.svelte';
 
     const modalStore = getModalStore();
 
@@ -19,12 +22,16 @@
         <div>
             <div class="flex flex-col gap-2">
                 <div class="flex items-center">
-                    <img class="h-6 mr-2" src="./green_marker.png" alt="Green map marker (active)" />
-                    <p>Sales active today</p>
+                    <ActiveSVG />
+                    <p class="ml-1">Sales active today</p>
                 </div>
                 <div class="flex items-center">
-                    <img class="h-6 mr-2" src="./yellow_marker.png" alt="Green map marker (active)" />
-                    <p>Upcoming sales</p>
+                    <UpcomingSVG />
+                    <p class="ml-1">Upcoming sales</p>
+                </div>
+                <div class="flex items-center">
+                    <MarketSvg />
+                    <p class="ml-1">Farmers' markets</p>
                 </div>
             </div>
         </div>

@@ -13,6 +13,9 @@
         const daysEls = sale.days.split(',').map((day: Day) => {
             return `<p>${day}</p>`;
         })
+        const openEls = sale.open.split(',').map((open: string) => {
+            return `<p class="ml-5">${open}</p>`;
+        })
         const infowindow = new google.maps.InfoWindow({
             content: `
                 <p class="text-lg font-semibold mb-4">${sale.displayName}</p>
@@ -27,7 +30,13 @@
                     </div>
                     <div>
                         <p class="font-semibold mr-1">Open: </p>
-                        <p class="ml-5">${sale.open}</p>
+                        ${openEls.join('')}
+                        ${sale.open !== 'All year'
+                            ? `<p class="ml-5 italic text-xs">
+                                * Check website for exact start & end dates
+                            </p>`
+                            : ''
+                        }
                     </div>
                     <div>
                         <p class="font-semibold mr-1">Days:</p>
@@ -114,13 +123,22 @@
             }
 
             // Type
-            if (filters.type && marker.sale.type !== filters.type) {
-                marker.setMap(null);
-                continue;
+            if (filters.type) {// && marker.sale.type !== filters.type) {
+                if (filters.type === 'market' && (marker.sale.type === 'market' || marker.sale.type === 'permanent')) {
+                    // Do nothing
+                } else if (marker.sale.type !== filters.type) {
+                    marker.setMap(null);
+                    continue;
+                }
             }
 
             // Tags
             if (filters.tags.length) {
+                if (!marker.sale.tags) {
+                    marker.setMap(null);
+                    continue;
+                }
+
                 const saleTags = marker.sale.tags.split(',');
                 if (!hasIntersection(saleTags, filters.tags)) {
                     marker.setMap(null);
@@ -140,10 +158,13 @@
     }
 
     export const addMarker = (sale: Sale) => {
-        const icon = sale.type === 'permanent'
+        let icon = sale.type === 'permanent'
                 ? MARKERS.permanent
                 : sale.active ? MARKERS.active : MARKERS.upcoming
-        icon.anchor = new google.maps.Point(0, 20);
+        icon = {
+            ...icon,
+            anchor: new google.maps.Point(0, 20)
+        };
 
         const marker = new google.maps.Marker({
             position: { lat: Number(sale.lat), lng: Number(sale.lng) },
