@@ -36,6 +36,7 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.6",
     "@prisma/client": "^5.1.1",
+    "@sentry/sveltekit": "^7.105.0",
     "dayjs": "^1.11.9",
     "uuid": "^9.0.1"
   }
