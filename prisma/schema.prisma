@@ -6,17 +6,17 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Sales {
   id              Int       @default(autoincrement()) @id
   createdAt       DateTime  @default(now())
   address         String    @db.VarChar(255)
-  lat             Float     @db.Float
-  lng             Float     @db.Float
+  lat             Float     @db.Real
+  lng             Float     @db.Real
   tags            String?   @db.VarChar(255)
   type            String    @db.VarChar(255)
   days            Days[]
@@ -38,8 +38,8 @@ model Markets {
   name            String    @unique @db.VarChar(255)
   displayName     String    @db.VarChar(255)
   address         String    @db.VarChar(255)
-  lat             Float     @db.Float
-  lng             Float     @db.Float
+  lat             Float     @db.Real
+  lng             Float     @db.Real
   type            String    @db.VarChar(255)
   link            String    @db.VarChar(255)
   open            String    @db.VarChar(255)
