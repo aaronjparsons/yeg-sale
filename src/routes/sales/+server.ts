@@ -31,6 +31,7 @@ export const GET = async ({ cookies }) => {
     const { today, weekAhead } = getDates();
     try {
         const markets = await prisma.markets.findMany();
+        const dayOfWeek = dayjs().format('dddd');
 
         const response = await prisma.sales.findMany({
             where: {
@@ -51,6 +52,12 @@ export const GET = async ({ cookies }) => {
         for (const sale of response) {
             setActive(sale, today);
             setOwned(sale, session);
+        }
+
+        for (const market of markets) {
+            if (market.days.includes(dayOfWeek)) {
+                market.active = true;
+            }
         }
 
         return new Response(JSON.stringify({

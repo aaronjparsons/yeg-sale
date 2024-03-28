@@ -9,9 +9,10 @@
     const markers = {};
 
     const buildPermanentSaleInfowindow = (sale: Market) => {
-        const today = dayjs();
-        const daysEls = sale.days.split(',').map((day: Day) => {
-            return `<p>${day}</p>`;
+        const today = dayjs().format('dddd');
+        const daysEls = sale.days.split(',').map((day: string) => {
+            const classString = day.includes(today) ? 'font-semibold' : '';
+            return `<p class="${classString}">${day}</p>`;
         })
         const openEls = sale.open.split(',').map((open: string) => {
             return `<p class="ml-5">${open}</p>`;
