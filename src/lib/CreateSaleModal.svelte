@@ -11,6 +11,18 @@
     let loading = false;
     const modalStore = getModalStore();
     const toastStore = getToastStore();
+    let hasDaysError = -1;
+
+    $: if ($sale.days) {
+        hasDaysError = -1;
+        if ($sale.days.length > 1) {
+            for (let i = 1; i < $sale.days.length; i++) {
+                if (dayjs($sale.days[i].date).isBefore(dayjs($sale.days[i - 1].date))) {
+                    hasDaysError = i;
+                }
+            }
+        }
+    }
 
     onMount(() => {
         sale.reset();
@@ -96,9 +108,9 @@
 
     const getMinDate = (index: number) => {
         if (index > 0) {
-            return dayjs($sale.days[index - 1].date).add(1, 'day').format('YYYY-MM-DD');
+            return dayjs($sale.days[index - 1].date).add(1, 'day').toDate();
         } else {
-            return '';
+            return dayjs().toDate();
         }
     }
 
@@ -150,9 +162,9 @@
                 />
             </label>
         </Step>
-        <Step>
+        <Step locked={hasDaysError !== -1}>
             <svelte:fragment slot="header">Days and time</svelte:fragment>
-            {#each $sale.days as day, index}
+            {#each $sale.days as day, index (index)}
                 <div class="flex items-center space-x-4 mb-2">
                     <div class="flex-grow">
                         {#if index === 0}
@@ -160,7 +172,12 @@
                                 <span class="label-text">Day</span>
                             </label>
                         {/if}
-                        <DateInput bind:value={day.date} format="dd-MM-yyyy" />
+                        <DateInput
+                            bind:value={day.date}
+                            class={hasDaysError === index ? 'error' : ''}
+                            format="dd-MM-yyyy"
+                            min={getMinDate(index)}
+                        />
                     </div>
                     <div class="flex-grow">
                         {#if index === 0}
