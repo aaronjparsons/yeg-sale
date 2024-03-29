@@ -5,6 +5,7 @@ import type { ModalComponent } from '@skeletonlabs/skeleton';
 import CreateSaleModal from '$lib/CreateSaleModal.svelte';
 import OptionsModal from '$lib/OptionsModal.svelte';
 import LegendModal from '$lib/LegendModal.svelte';
+import DeleteConfirmModal from '$lib/DeleteConfirmModal.svelte';
 
 initializeStores();
 
@@ -13,6 +14,7 @@ const modalRegistry: Record<string, ModalComponent> = {
 	createSaleModal: { ref: CreateSaleModal },
 	optionsModal: { ref: OptionsModal },
 	legendModal: { ref: LegendModal },
+	deleteConfirmModal: { ref: DeleteConfirmModal },
 };
 
 </script>

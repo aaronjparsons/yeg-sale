@@ -215,10 +215,10 @@
 <script lang="ts">
     import { Loader } from '@googlemaps/js-api-loader';
     import { onMount } from 'svelte';
-    import { getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
+    import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
     import { Sales } from '$lib/Store';
 
-    const toastStore = getToastStore();
+    const modalStore = getModalStore();
     let mapEl : HTMLElement;
 
     onMount(() => {
@@ -274,24 +274,17 @@
         });
 
         window.deleteSale = async (id: number, marker: any) => {
-            const response = await fetch(`/sales/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (response.ok) {
-                const marker = markers[id];
-                marker.setMap(null);
-                const toast: ToastSettings = {
-                    message: 'Sale deleted',
-                };
-                toastStore.trigger(toast);
-            } else {
-                const toast: ToastSettings = {
-                    message: 'Error deleting sale',
-                    background: 'variant-filled-error',
-                };
-                toastStore.trigger(toast);
-            }
+            const modal: ModalSettings = {
+                type: 'component',
+                component: 'deleteConfirmModal',
+                meta: {
+                    id,
+                    onDelete: () => {
+                        markers[id].setMap(null);
+                    }
+                }
+            };
+            modalStore.trigger(modal);
         }
     })
 </script>

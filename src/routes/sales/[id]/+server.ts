@@ -16,13 +16,6 @@ export const DELETE = async ({ params, cookies }) => {
             throw error(401);
         }
 
-        // Was unable to get onDelete: Cascade working in the schema
-        await prisma.days.deleteMany({
-            where: {
-                saleId: parseInt(params.id)
-            }
-        });
-
         await prisma.sales.delete({
             where: {
                 id: parseInt(params.id)

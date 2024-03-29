@@ -25,7 +25,7 @@ model Sales {
 
 model Days {
   id              Int       @default(autoincrement()) @id
-  sale            Sales     @relation(fields: [saleId], references: [id])
+  sale            Sales     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   saleId          Int
   startTime       DateTime
   endTime         DateTime
