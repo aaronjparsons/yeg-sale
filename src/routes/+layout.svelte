@@ -6,6 +6,7 @@ import CreateSaleModal from '$lib/CreateSaleModal.svelte';
 import OptionsModal from '$lib/OptionsModal.svelte';
 import LegendModal from '$lib/LegendModal.svelte';
 import DeleteConfirmModal from '$lib/DeleteConfirmModal.svelte';
+import Analytics from '$lib/Analytics.svelte';
 
 initializeStores();
 
@@ -22,3 +23,4 @@ const modalRegistry: Record<string, ModalComponent> = {
 <slot />
 <Modal components={modalRegistry} />
 <Toast />
+<Analytics />
