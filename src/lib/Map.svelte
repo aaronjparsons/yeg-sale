@@ -234,6 +234,7 @@
             map = new google.maps.Map(mapEl, {
                 center,
                 zoom: window.innerWidth > 900 ? 12 : 10,
+                minZoom: 8,
                 streetViewControl: false,
                 fullscreenControl: false,
                 mapTypeControl: false,
