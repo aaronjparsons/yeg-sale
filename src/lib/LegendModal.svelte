@@ -27,7 +27,7 @@
                 </div>
                 <div class="flex items-center">
                     <UpcomingSVG />
-                    <p class="ml-1">Upcoming sales</p>
+                    <p class="ml-1">Upcoming sales<span class="ml-1 text-sm text-gray-700">(within the next 30 days)</span></p>
                 </div>
                 <div class="flex items-center">
                     <MarketSvg />

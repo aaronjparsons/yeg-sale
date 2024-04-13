@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 
 const getDates = () => {
     const today = dayjs().toISOString();
-    const weekAhead = dayjs(today).add(7, 'days').toISOString();
+    const thirtyDaysAhead = dayjs(today).add(30, 'days').toISOString();
 
-    return { today, weekAhead };
+    return { today, thirtyDaysAhead };
 }
 
 const setActive = (sale: any, today: string) => {
@@ -28,7 +28,7 @@ const setOwned = (sale: any, session: string) => {
 
 export const GET = async ({ cookies }) => {
     const session = cookies.get('session');
-    const { today, weekAhead } = getDates();
+    const { today, thirtyDaysAhead } = getDates();
     try {
         const markets = await prisma.markets.findMany();
         const dayOfWeek = dayjs().format('dddd');
@@ -37,9 +37,9 @@ export const GET = async ({ cookies }) => {
             where: {
                 days: {
                     some: {
-                        endTime: { // TODO: Should this be startTime???
+                        endTime: {
                             gte: today,
-                            lt: weekAhead
+                            lt: thirtyDaysAhead
                         }
                     }
                 }

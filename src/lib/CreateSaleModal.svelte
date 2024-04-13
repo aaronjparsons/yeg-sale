@@ -85,13 +85,17 @@
             // Check if newSale falls within the upcoming days constraint
             const today = dayjs();
             const startTime = dayjs(newSale.days[0].startTime);
-            if (today.diff(startTime, 'days') <= 7) {
-                // Is upcoming within 7 days, add it to data
+            let message = 'Sale successfully created';
+
+            if (startTime.diff(today, 'days') <= 30) {
+                // Is upcoming within 30 days, add it to data
                 addMarker(newSale);
+            } else {
+                message = 'Sale was successfully created, but is currently hidden as it begins more than 30 days from now.'
             }
-            // TODO: Success msg if sale is more than 7 days out?
+
             const toast: ToastSettings = {
-                message: 'Sale created',
+                message,
             };
             toastStore.trigger(toast);
             // Close modal
