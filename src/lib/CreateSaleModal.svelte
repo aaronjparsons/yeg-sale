@@ -181,6 +181,7 @@
                             class={hasDaysError === index ? 'error' : ''}
                             format="dd-MM-yyyy"
                             min={getMinDate(index)}
+                            max={dayjs().add(1, 'years').toDate()}
                         />
                     </div>
                     <div class="flex-grow">
