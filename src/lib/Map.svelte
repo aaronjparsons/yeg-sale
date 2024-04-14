@@ -272,6 +272,11 @@
             for (const sale of $Sales) {
                 addMarker(sale);
             }
+
+            // ---- DEBUG - Click event ----
+            // map.addListener('click', (mapsMouseEvent) => {
+            //     console.log(mapsMouseEvent.latLng.toJSON());
+            // });
         });
 
         window.deleteSale = async (id: number, marker: any) => {

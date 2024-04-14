@@ -40,9 +40,9 @@ async function main() {
         create: {
             name: 'south-common',
             displayName: "South Common Farmers' Market",
-            address: '1903 Parsons Road NW, Edmonton AB',
-            lat: 53.4478,
-            lng: -113.48,
+            address: '1311 102 St NW, Edmonton, AB',
+            lat: 53.44188907732564,
+            lng: -113.48740748790337,
             type: 'permanent',
             link: 'http://southcommonmarket.ca/',
             open: 'May - October',
