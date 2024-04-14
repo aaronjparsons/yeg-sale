@@ -1,12 +1,13 @@
 export const SALE_TYPES = {
     yard: 'Yard Sale',
     estate: 'Estate Sale',
-    market: 'Market'
+    market: 'Market',
+    craft: 'Craft Fair'
 }
 
 export const TAGS = [
-    'Antiques', 'Baby Items', 'Books/Media', 'Clothing', 'Collectibles',  'Electronics', 'Food',
-    'Furniture', 'Housewares', 'Sporting Goods', 'Toys', 'Tools',
+    'Antiques', 'Baby items', 'Books/Media', 'Clothing', 'Collectibles', 'Crafts', 'Electronics', 'Food',
+    'Furniture', 'Games', 'Housewares', 'Sporting goods', 'Toys', 'Tools',
 ];
 
 export const MARKERS = {
