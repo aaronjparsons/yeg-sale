@@ -145,6 +145,38 @@ async function main() {
             days: 'Thursday: 4:00 pm - 7:00 pm'
         },
     })
+
+    await prisma.markets.upsert({
+        where: { name: "beverly" },
+        update: {},
+        create: {
+            name: 'beverly',
+            displayName: "Beverly Towne Farmers' Market",
+            address: 'Riverview Crossing Mall, 3210 118 Ave NW, Edmonton, AB',
+            lat: 53.5715282,
+            lng: -113.3905698,
+            type: 'permanent',
+            link: 'https://www.beverlyfarmersmarket.ca/',
+            open: 'May - October',
+            days: 'Tuesday: 3:00 pm - 7:00 pm'
+        },
+    })
+
+    await prisma.markets.upsert({
+        where: { name: "ottewell" },
+        update: {},
+        create: {
+            name: 'ottewell',
+            displayName: "Ottewell Artisan Farmers' Market",
+            address: '5920 93A Ave NW, Edmonton, AB',
+            lat: 53.5308891,
+            lng: -113.4237746,
+            type: 'permanent',
+            link: 'http://www.ottewell.ca/ottewell-market/',
+            open: 'All year',
+            days: 'Thursday: 4:00 pm - 7:00 pm'
+        },
+    })
 }
 
 main()
