@@ -176,60 +176,64 @@
         </Step>
         <Step locked={hasSomeErrors}>
             <svelte:fragment slot="header">Days and time</svelte:fragment>
-            {#each $sale.days as day, index (index)}
-                <div class="flex items-center space-x-4 mb-2">
-                    <div class="flex-grow">
-                        {#if index === 0}
-                            <label for="day" class="label">
-                                <span class="label-text">Day</span>
-                            </label>
+            <div class="overflow-x-auto">
+                {#each $sale.days as day, index (index)}
+                    <div class="flex items-center space-x-4 mb-2">
+                        <div class="flex-grow">
+                            {#if index === 0}
+                                <label for="day" class="label">
+                                    <span class="label-text">Day</span>
+                                </label>
+                            {/if}
+                            <input
+                                bind:value={day.date}
+                                class="date-input input input-bordered p-2 {day.errors[0] ? 'input-error' : ''}"
+                                type="date"
+                                min={getMinDate(index)}
+                                max={dayjs().add(1, 'years').format('YYYY-MM-DD')}
+                            />
+                        </div>
+                        <div class="flex-grow">
+                            {#if index === 0}
+                                <label for="start-time" class="label">
+                                    <span class="label-text">Start time</span>
+                                </label>
+                            {/if}
+                            <input
+                                bind:value={day.startTime}
+                                class="input input-bordered p-2 {day.errors[1] ? 'input-error' : ''}"
+                                type="time"
+                                max={day.endTime}
+                            />
+                        </div>
+                        <div class="flex-grow">
+                            {#if index === 0}
+                                <label for="end-time" class="label">
+                                    <span class="label-text">End time</span>
+                                </label>
+                            {/if}
+                            <input
+                                bind:value={day.endTime}
+                                class="input input-bordered p-2 {day.errors[2] ? 'input-error' : ''}"
+                                type="time"
+                                min={day.startTime}
+                            />
+                        </div>
+                        {#if index > 0}
+                            <div class="flex-shrink-0">
+                                <button
+                                    class="btn-icon btn-icon-sm variant-filled-error text-white"
+                                    on:click={() => sale.removeDay(index)}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        {:else}
+                            <span class="w-[33px]"></span>
                         {/if}
-                        <input
-                            bind:value={day.date}
-                            class="date-input input input-bordered p-2 {day.errors[0] ? 'input-error' : ''}"
-                            type="date"
-                            min={getMinDate(index)}
-                            max={dayjs().add(1, 'years').format('YYYY-MM-DD')}
-                        />
                     </div>
-                    <div class="flex-grow">
-                        {#if index === 0}
-                            <label for="start-time" class="label">
-                                <span class="label-text">Start time</span>
-                            </label>
-                        {/if}
-                        <input
-                            bind:value={day.startTime}
-                            class="input input-bordered p-2 {day.errors[1] ? 'input-error' : ''}"
-                            type="time"
-                            max={day.endTime}
-                        />
-                    </div>
-                    <div class="flex-grow">
-                        {#if index === 0}
-                            <label for="end-time" class="label">
-                                <span class="label-text">End time</span>
-                            </label>
-                        {/if}
-                        <input
-                            bind:value={day.endTime}
-                            class="input input-bordered p-2 {day.errors[2] ? 'input-error' : ''}"
-                            type="time"
-                            min={day.startTime}
-                        />
-                    </div>
-                    {#if index > 0}
-                        <button
-                            class="btn-icon btn-icon-sm variant-filled-error text-white"
-                            on:click={() => sale.removeDay(index)}
-                        >
-                            ✕
-                        </button>
-                    {:else}
-                        <span class="w-[33px]"></span>
-                    {/if}
-                </div>
-            {/each}
+                {/each}
+            </div>
             <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={sale.addDay}>+ Add another day</button>
             {#if hasSomeErrors}
                 <aside class="alert variant-ghost-error" transition:slide|local={{ duration: 200 }}>
