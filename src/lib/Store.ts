@@ -18,7 +18,12 @@ const createSale = () => {
         let newDate = prevDay
             ? dayjs(prevDay?.date).add(1, 'day')
             : dayjs()
-        return { date: newDate.toDate(), startTime: '14:00', endTime: '20:00' };
+        return {
+            date: newDate.format('YYYY-MM-DD'),
+            startTime: '14:00',
+            endTime: '20:00',
+            errors: [false, false, false]
+        };
     }
 
     const addDay = () => {

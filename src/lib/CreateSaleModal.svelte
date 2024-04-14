@@ -1,27 +1,34 @@
 <script lang="ts">
     import { onMount, createEventDispatcher, onDestroy } from 'svelte';
     import { getModalStore, Stepper, Step, getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
-    import { DateInput } from 'date-picker-svelte'
     import dayjs from '$lib/dayjs';
     import { sale } from '$lib/Store';
-    import TimeSelect from '$lib/TimeSelect.svelte'
     import { addMarker } from './Map.svelte';
     import { TAGS, SALE_TYPES } from './utils';
+  import { slide } from 'svelte/transition';
 
     let loading = false;
     const modalStore = getModalStore();
     const toastStore = getToastStore();
-    let hasDaysError = -1;
+    let hasSomeErrors = false;
 
     $: if ($sale.days) {
-        hasDaysError = -1;
-        if ($sale.days.length > 1) {
-            for (let i = 1; i < $sale.days.length; i++) {
-                if (dayjs($sale.days[i].date).isBefore(dayjs($sale.days[i - 1].date))) {
-                    hasDaysError = i;
-                }
+        hasSomeErrors = false;
+        for (let i = 0; i < $sale.days.length; i++) {
+            const day = $sale.days[i];
+            day.errors = [false, false, false];
+
+            // Check that day is not before the previous day
+            if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
+                day.errors[0] = true;
+            }
+
+            // Check that start time is not after end time
+            if (day.startTime > day.endTime) {
+                day.errors[1] = true;
             }
         }
+        hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
     }
 
     onMount(() => {
@@ -66,10 +73,11 @@
         loading = true;
         const data = { ...$sale };
         for (const day of data.days) {
-            const dayString = dayjs(day.date).format('YYYY-MM-DD');
+            const dayString = day.date; //dayjs(day.date).format('YYYY-MM-DD');
             day.startTime = dayjs(`${dayString} ${day.startTime}`).toISOString();
             day.endTime = dayjs(`${dayString} ${day.endTime}`).toISOString();
             delete day.date;
+            delete day.errors;
         }
 
         // Convert tags to comma separated string
@@ -112,9 +120,9 @@
 
     const getMinDate = (index: number) => {
         if (index > 0) {
-            return dayjs($sale.days[index - 1].date).add(1, 'day').toDate();
+            return dayjs($sale.days[index - 1].date).add(1, 'day').format('YYYY-MM-DD');
         } else {
-            return dayjs().toDate();
+            return dayjs().format('YYYY-MM-DD');
         }
     }
 
@@ -166,7 +174,7 @@
                 />
             </label>
         </Step>
-        <Step locked={hasDaysError !== -1}>
+        <Step locked={hasSomeErrors}>
             <svelte:fragment slot="header">Days and time</svelte:fragment>
             {#each $sale.days as day, index (index)}
                 <div class="flex items-center space-x-4 mb-2">
@@ -176,12 +184,12 @@
                                 <span class="label-text">Day</span>
                             </label>
                         {/if}
-                        <DateInput
+                        <input
                             bind:value={day.date}
-                            class={hasDaysError === index ? 'error' : ''}
-                            format="dd-MM-yyyy"
+                            class="date-input input input-bordered p-2 {day.errors[0] ? 'input-error' : ''}"
+                            type="date"
                             min={getMinDate(index)}
-                            max={dayjs().add(1, 'years').toDate()}
+                            max={dayjs().add(1, 'years').format('YYYY-MM-DD')}
                         />
                     </div>
                     <div class="flex-grow">
@@ -190,7 +198,12 @@
                                 <span class="label-text">Start time</span>
                             </label>
                         {/if}
-                        <TimeSelect bind:value={day.startTime} max={day.endTime} />
+                        <input
+                            bind:value={day.startTime}
+                            class="input input-bordered p-2 {day.errors[1] ? 'input-error' : ''}"
+                            type="time"
+                            max={day.endTime}
+                        />
                     </div>
                     <div class="flex-grow">
                         {#if index === 0}
@@ -198,7 +211,12 @@
                                 <span class="label-text">End time</span>
                             </label>
                         {/if}
-                        <TimeSelect bind:value={day.endTime} min={day.startTime} />
+                        <input
+                            bind:value={day.endTime}
+                            class="input input-bordered p-2 {day.errors[2] ? 'input-error' : ''}"
+                            type="time"
+                            min={day.startTime}
+                        />
                     </div>
                     {#if index > 0}
                         <button
@@ -213,6 +231,11 @@
                 </div>
             {/each}
             <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={sale.addDay}>+ Add another day</button>
+            {#if hasSomeErrors}
+                <aside class="alert variant-ghost-error" transition:slide|local={{ duration: 200 }}>
+                    Please ensure days are in order, and all start times are before their end times.
+                </aside>
+            {/if}
         </Step>
         <Step locked={loading || !$sale.tags.length}>
             <svelte:fragment slot="header">Add categories</svelte:fragment>

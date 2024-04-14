@@ -24,7 +24,8 @@ interface Sale {
 interface Day {
     date?: string,
     startTime: string,
-    endTime: string
+    endTime: string,
+    errors?: boolean[]
 }
 
 interface Market {
