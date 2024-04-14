@@ -20,8 +20,8 @@ const createSale = () => {
             : dayjs()
         return {
             date: newDate.format('YYYY-MM-DD'),
-            startTime: '14:00',
-            endTime: '20:00',
+            startTime: '12:00',
+            endTime: '18:00',
             errors: [false, false, false]
         };
     }
