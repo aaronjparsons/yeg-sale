@@ -72,6 +72,7 @@
     bind:value
     id={ id }
     class="select select-bordered w-full"
+    style="min-width: 92px; padding-right: 0.5rem;"
 >
     {#each options as option (option.value)}
         <option value={ option.value } disabled={checkDisabled(option.value)}>{ option.label }</option>
