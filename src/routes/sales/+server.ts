@@ -67,7 +67,7 @@ export const GET = async ({ cookies }) => {
         }));
     } catch (err) {
         console.log(err)
-        throw error(err?.status || 400);
+        error(err?.status || 400);
     }
 }
 
@@ -104,6 +104,6 @@ export const POST = async ({ request, cookies }) => {
         return new Response(JSON.stringify(response));
     } catch (err) {
         console.log(err)
-        throw error(err?.status || 400);
+        error(err?.status || 400);
     }
 }

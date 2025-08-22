@@ -13,7 +13,7 @@ export const DELETE = async ({ params, cookies }) => {
         });
 
         if (response?.session !== session) {
-            throw error(401);
+            error(401);
         }
 
         await prisma.sales.delete({
@@ -24,6 +24,6 @@ export const DELETE = async ({ params, cookies }) => {
         return new Response();
     } catch (err) {
         console.log(err)
-        throw error(err?.status || 400);
+        error(err?.status || 400);
     }
 }
