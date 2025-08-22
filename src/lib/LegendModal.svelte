@@ -14,7 +14,7 @@
 <div class="relative card w-modal p-4 shadow-lg">
     <div class="flex justify-between mb-4">
         <p class="font-semibold text-2xl">Legend</p>
-        <button class="btn-icon btn-icon-sm" on:click={closeModal}>
+        <button class="btn-icon btn-icon-sm" onclick={closeModal}>
             ✕
         </button>
     </div>

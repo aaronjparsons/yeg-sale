@@ -7,6 +7,11 @@ import OptionsModal from '$lib/OptionsModal.svelte';
 import LegendModal from '$lib/LegendModal.svelte';
 import DeleteConfirmModal from '$lib/DeleteConfirmModal.svelte';
 import Analytics from '$lib/Analytics.svelte';
+	interface Props {
+		children?: import('svelte').Snippet;
+	}
+
+	let { children }: Props = $props();
 
 initializeStores();
 
@@ -20,7 +25,7 @@ const modalRegistry: Record<string, ModalComponent> = {
 
 </script>
 
-<slot />
+{@render children?.()}
 <Modal components={modalRegistry} />
 <Toast />
 <Analytics />

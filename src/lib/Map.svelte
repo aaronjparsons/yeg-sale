@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<!-- <script context="module" lang="ts">
     import { get } from 'svelte/store';
     import dayjs from '$lib/dayjs';
     import { Filters } from '$lib/Store';
@@ -219,7 +219,7 @@
     import { Sales } from '$lib/Store';
 
     const modalStore = getModalStore();
-    let mapEl : HTMLElement;
+    let mapEl : HTMLElement = $state();
 
     onMount(() => {
         const loader = new Loader({
@@ -298,4 +298,4 @@
 <div
     bind:this={mapEl}
     class="h-full w-full"
-></div>
+></div> -->

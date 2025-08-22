@@ -1,10 +1,21 @@
 <script lang="ts">
-    export let id = '';
-    export let value = '';
-    export let min: null | string = null;
-    export let max: null | string = null;
+    import { run } from 'svelte/legacy';
 
-    let options = [
+    interface Props {
+        id?: string;
+        value?: string;
+        min?: null | string;
+        max?: null | string;
+    }
+
+    let {
+        id = '',
+        value = $bindable(''),
+        min = null,
+        max = null
+    }: Props = $props();
+
+    let options = $state([
         { value: '00:00', label: '12:00am' },
         { value: '00:30', label: '12:30am' },
         { value: '01:00', label: '1:00am' },
@@ -53,11 +64,13 @@
         { value: '22:30', label: '10:30pm' },
         { value: '23:00', label: '11:00pm' },
         { value: '23:30', label: '11:30pm' }
-    ];
+    ]);
 
-    $: if (min || max) {
-        options = options;
-    }
+    run(() => {
+        if (min || max) {
+            options = options;
+        }
+    });
 
     const checkDisabled = (option: string) => {
         const hour = parseInt(option.replace(':', ''));

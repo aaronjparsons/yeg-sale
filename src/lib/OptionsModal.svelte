@@ -5,7 +5,7 @@
     import { filterMapMarkers, resetMapMarkers } from './Map.svelte';
 
     const modalStore = getModalStore();
-    let localFilters = {...$Filters};
+    let localFilters = $state({...$Filters});
 
     const handleTagClicked = (tag: string) => {
         const tagIndex = localFilters.tags.indexOf(tag);
@@ -33,17 +33,17 @@
         modalStore.close();
     }
 
-    $: hasFilters = Object.values(localFilters).some(f => {
+    let hasFilters = $derived(Object.values(localFilters).some(f => {
         return Array.isArray(f)
             ? f.length > 0
             : f
-    });
+    }));
 </script>
 
 <div class="relative card w-modal p-4 shadow-lg">
     <div class="flex justify-between mb-4">
         <p class="font-semibold text-2xl">Filters</p>
-        <button class="btn-icon btn-icon-sm" on:click={closeModal}>
+        <button class="btn-icon btn-icon-sm" onclick={closeModal}>
             ✕
         </button>
     </div>
@@ -64,7 +64,7 @@
                 {#each TAGS as tag}
                     <span
                         class="chip {localFilters.tags.includes(tag) ? 'variant-filled' : 'variant-ghost'}"
-                        on:click={() => handleTagClicked(tag)}
+                        onclick={() => handleTagClicked(tag)}
                     >
                         {tag}
                     </span>
@@ -73,11 +73,11 @@
         </div>
         <div class="flex justify-end">
             {#if hasFilters}
-                <button class="btn variant-filled mr-2" on:click={clearFilters}>
+                <button class="btn variant-filled mr-2" onclick={clearFilters}>
                     Clear filters
                 </button>
             {/if}
-            <button class="btn variant-filled" on:click={applyFilters}>
+            <button class="btn variant-filled" onclick={applyFilters}>
                 Apply filters
             </button>
         </div>

@@ -6,15 +6,15 @@
     import Map from '$lib/Map.svelte';
     import { Sales, Filters } from '$lib/Store';
 
-    export let data = {
+    let { data = {
         sales: [],
         markets: []
-    };
+    } } = $props();
 
     $Sales = [...data.sales, ...data.markets];
 
     const modalStore = getModalStore();
-    let showMenuBtns = false;
+    let showMenuBtns = $state(false);
 
     const toggleMenuBtns = () => {
         showMenuBtns = !showMenuBtns;
@@ -44,11 +44,11 @@
         modalStore.trigger(modal);
     }
 
-    $: hasFilters = Object.values($Filters).some(f => {
+    let hasFilters = $derived(Object.values($Filters).some(f => {
         return Array.isArray(f)
             ? f.length > 0
             : f
-    });
+    }));
 </script>
 
 <div class="absolute top-2 left-2 w-32 sm:top-5 sm:left-5 sm:w-auto z-10">
@@ -57,13 +57,13 @@
 
 <!-- Desktop buttons -->
 <div class="absolute top-36 left-5 z-10 space-y-2 hidden sm:block">
-    <button type="button" class="flex btn variant-filled" on:click={openCreateSaleModal}>
+    <button type="button" class="flex btn variant-filled" onclick={openCreateSaleModal}>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         Create sale
     </button>
-    <button type="button" class="flex btn variant-filled" on:click={openLegendModal}>
+    <button type="button" class="flex btn variant-filled" onclick={openLegendModal}>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
         </svg>
@@ -77,7 +77,7 @@
                 </svg>
             </span>
         {/if}
-        <button type="button" class="flex btn variant-filled" on:click={openOptionsModal}>
+        <button type="button" class="flex btn variant-filled" onclick={openOptionsModal}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-1">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
             </svg>
@@ -90,12 +90,12 @@
 <div class="absolute bottom-5 right-5 z-10 block sm:hidden">
     {#if showMenuBtns}
         <div transition:fly={{ y: 70 }} class="flex flex-col items-center space-y-2 mb-2">
-            <button type="button" class="btn-icon variant-filled" on:click={openCreateSaleModal}>
+            <button type="button" class="btn-icon variant-filled" onclick={openCreateSaleModal}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
             </button>
-            <button type="button" class="btn-icon variant-filled" on:click={openLegendModal}>
+            <button type="button" class="btn-icon variant-filled" onclick={openLegendModal}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                 </svg>
@@ -108,7 +108,7 @@
                         </svg>
                     </span>
                 {/if}
-                <button type="button" class="btn-icon variant-filled" on:click={openOptionsModal}>
+                <button type="button" class="btn-icon variant-filled" onclick={openOptionsModal}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
                     </svg>
@@ -124,7 +124,7 @@
                 </svg>
             </span>
         {/if}
-        <button type="button" class="btn-icon btn-icon-lg {showMenuBtns ? 'variant-filled-surface' : 'variant-filled'}" on:click={toggleMenuBtns}>
+        <button type="button" class="btn-icon btn-icon-lg {showMenuBtns ? 'variant-filled-surface' : 'variant-filled'}" onclick={toggleMenuBtns}>
             {#if showMenuBtns}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -137,7 +137,7 @@
         </button>
     </div>
 </div>
-<Map />
+<!-- <Map /> -->
 
 <style>
     :global(html, body) {

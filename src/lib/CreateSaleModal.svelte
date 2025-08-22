@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run, preventDefault } from 'svelte/legacy';
+
     import { onMount, createEventDispatcher, onDestroy } from 'svelte';
     import { getModalStore, Stepper, Step, getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
     import dayjs from '$lib/dayjs';
@@ -7,29 +9,31 @@
     import { TAGS, SALE_TYPES } from './utils';
   import { slide } from 'svelte/transition';
 
-    let loading = false;
+    let loading = $state(false);
     const modalStore = getModalStore();
     const toastStore = getToastStore();
-    let hasSomeErrors = false;
+    let hasSomeErrors = $state(false);
 
-    $: if ($sale.days) {
-        hasSomeErrors = false;
-        for (let i = 0; i < $sale.days.length; i++) {
-            const day = $sale.days[i];
-            day.errors = [false, false, false];
+    run(() => {
+    if ($sale.days) {
+          hasSomeErrors = false;
+          for (let i = 0; i < $sale.days.length; i++) {
+              const day = $sale.days[i];
+              day.errors = [false, false, false];
 
-            // Check that day is not before the previous day
-            if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
-                day.errors[0] = true;
-            }
+              // Check that day is not before the previous day
+              if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
+                  day.errors[0] = true;
+              }
 
-            // Check that start time is not after end time
-            if (day.startTime > day.endTime) {
-                day.errors[1] = true;
-            }
-        }
-        hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
-    }
+              // Check that start time is not after end time
+              if (day.startTime > day.endTime) {
+                  day.errors[1] = true;
+              }
+          }
+          hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
+      }
+  });
 
     onMount(() => {
         sale.reset();
@@ -147,14 +151,16 @@
 
 <div class="relative card w-modal p-4 shadow-lg">
     <div class="flex justify-end">
-        <button class="btn-icon btn-icon-sm" on:click={closeModal}>
+        <button class="btn-icon btn-icon-sm" onclick={closeModal}>
             ✕
         </button>
     </div>
 
     <Stepper on:complete={onCompleteHandler}>
         <Step locked={!Boolean($sale.address.length)}>
-            <svelte:fragment slot="header">Add your upcoming sale to the map!</svelte:fragment>
+            {#snippet header()}
+            Add your upcoming sale to the map!
+          {/snippet}
             <label for="sale-type" class="label">
                 <span class="label-text">Sale Type</span>
                 <select bind:value={$sale.type} id="sale-type" class="select select-bordered w-full">
@@ -175,7 +181,9 @@
             </label>
         </Step>
         <Step locked={hasSomeErrors}>
-            <svelte:fragment slot="header">Days and time</svelte:fragment>
+            {#snippet header()}
+            Days and time
+          {/snippet}
             <div class="overflow-x-auto">
                 {#each $sale.days as day, index (index)}
                     <div class="flex items-center space-x-4 mb-2">
@@ -223,7 +231,7 @@
                             <div class="flex-shrink-0">
                                 <button
                                     class="btn-icon btn-icon-sm variant-filled-error text-white"
-                                    on:click={() => sale.removeDay(index)}
+                                    onclick={() => sale.removeDay(index)}
                                 >
                                     ✕
                                 </button>
@@ -234,7 +242,7 @@
                     </div>
                 {/each}
             </div>
-            <button class="btn btn-sm variant-filled w-full" on:click|preventDefault={sale.addDay}>+ Add another day</button>
+            <button class="btn btn-sm variant-filled w-full" onclick={preventDefault(sale.addDay)}>+ Add another day</button>
             {#if hasSomeErrors}
                 <aside class="alert variant-ghost-error" transition:slide|local={{ duration: 200 }}>
                     Please ensure days are in order, and all start times are before their end times.
@@ -242,12 +250,14 @@
             {/if}
         </Step>
         <Step locked={loading || !$sale.tags.length}>
-            <svelte:fragment slot="header">Add categories</svelte:fragment>
+            {#snippet header()}
+            Add categories
+          {/snippet}
             <div class="flex flex-wrap gap-2">
                 {#each TAGS as tag}
                     <span
                         class="chip {$sale.tags.includes(tag) ? 'variant-filled' : 'variant-ghost'}"
-                        on:click={() => handleTagClicked(tag)}
+                        onclick={() => handleTagClicked(tag)}
                     >
                         {tag}
                     </span>

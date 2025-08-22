@@ -3,7 +3,7 @@
 
     const modalStore = getModalStore();
     const toastStore = getToastStore();
-    let deleting = false;
+    let deleting = $state(false);
 
     const handleDelete = async () => {
         deleting = true;
@@ -37,17 +37,17 @@
 <div class="relative card w-modal p-4 shadow-lg">
     <div class="flex justify-between mb-4">
         <p class="font-semibold text-2xl">Confirm delete</p>
-        <button class="btn-icon btn-icon-sm" on:click={closeModal}>
+        <button class="btn-icon btn-icon-sm" onclick={closeModal}>
             ✕
         </button>
     </div>
     <div class="space-y-4">
         <p>Are you sure you want to delete this sale?</p>
         <div class="flex justify-end">
-            <button class="btn variant-filled-error mr-2" disabled={deleting} on:click={handleDelete}>
+            <button class="btn variant-filled-error mr-2" disabled={deleting} onclick={handleDelete}>
                 {deleting ? 'Deleting...' : 'Delete'}
             </button>
-            <button class="btn variant-filled" on:click={closeModal}>
+            <button class="btn variant-filled" onclick={closeModal}>
                 Cancel
             </button>
         </div>
