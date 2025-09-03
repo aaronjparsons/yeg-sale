@@ -48,3 +48,38 @@ button.gm-ui-hover-effect {
         height: 20px !important;
     }
 }
+
+@keyframes dropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px); /* start above */
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px); /* overshoot a bit */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* settle in place */
+  }
+}
+
+.marker {
+  opacity: 0;
+  filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.5));
+}
+
+.maplibregl-popup {
+    max-width: 95vw;
+}
+
+.maplibregl-popup-content {
+    border-radius: 12px !important;
+    padding: 20px 10px 10px 10px !important;
+}
+
+.maplibregl-popup-close-button {
+    font-size: 32px;
+    top: 5px !important;
+    right: 10px !important;
+}

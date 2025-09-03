@@ -62,7 +62,7 @@ async function main() {
             type: 'permanent',
             link: 'http://osfm.ca/',
             open: 'All year',
-            days: 'Saturday: 8:00 am - 3:00 pm'
+            days: 'Saturday: 8:00 am - 3:00 pm, Sunday: 11:00 am - 3:00 pm'
         },
     })
 

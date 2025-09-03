@@ -17,7 +17,25 @@ const config = {
 		)
 	],
 	theme: {
-		extend: {},
+		extend: {
+			colors: {
+				purple: {
+					light: "#A892C2",
+					DEFAULT: "#7A5C9D",
+					dark: "#563F70",
+				},
+				green: {
+					light: "#8BAE94",
+					DEFAULT: "#5C8D67",
+					dark: "#40634A",
+				},
+				yellow: {
+					light: "#E4D6A0",
+					DEFAULT: "#D4B860",
+					dark: "#9C8030",
+				},
+			},
+		},
 	},
 	plugins: [
 		// 4. Append the Skeleton plugin (after other plugins)

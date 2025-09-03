@@ -1,4 +1,4 @@
-<!-- <script context="module" lang="ts">
+<script context="module" lang="ts">
     import { get } from 'svelte/store';
     import dayjs from '$lib/dayjs';
     import { Filters } from '$lib/Store';
@@ -211,7 +211,7 @@
         return activeSale?.id === sale.id
     }
 </script>
-
+<!--
 <script lang="ts">
     import { Loader } from '@googlemaps/js-api-loader';
     import { onMount } from 'svelte';

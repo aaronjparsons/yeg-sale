@@ -4,6 +4,7 @@
     import { getModalStore } from '@skeletonlabs/skeleton';
     import type { ModalSettings } from '@skeletonlabs/skeleton';
     import Map from '$lib/Map.svelte';
+    import MapLibre from '$lib/MapLibre.svelte';
     import { Sales, Filters } from '$lib/Store';
 
     let { data = {
@@ -138,6 +139,7 @@
     </div>
 </div>
 <!-- <Map /> -->
+<MapLibre />
 
 <style>
     :global(html, body) {

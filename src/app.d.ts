@@ -19,6 +19,7 @@ interface Sale {
     infowindow?: google.maps.InfoWindow
     session?: string,
     owned?: boolean
+    displayName?: string
 }
 
 interface Day {
