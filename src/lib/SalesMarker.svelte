@@ -3,6 +3,7 @@
     import type { Dayjs } from 'dayjs';
     import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
     import { SALE_TYPES } from "$lib/utils";
+    import { Sales } from '$lib/Store';
     import { Marker, Popup } from "svelte-maplibre";
     import MapMarker from '$lib/Marker.svelte';
 
@@ -27,7 +28,7 @@
             meta: {
                 id,
                 onDelete: () => {
-                    // TODO: Remove marker from map without full reload
+                    Sales.update(sales => sales.filter(s => s.id !== id) );
                 }
             }
         };
@@ -37,7 +38,7 @@
 
 <Marker lngLat={{ lng: sale.lng, lat: sale.lat }} class="cursor-pointer">
     <MapMarker color={sale.active ? 'fill-green' : 'fill-yellow'} {index} />
-    <Popup offset={[0, -10]} onopen={() => setCenter(sale.lat, sale.lng)}>
+    <Popup closeButton offset={[0, -10]} onopen={() => setCenter(sale.lat, sale.lng)}>
         <p class="text-lg font-semibold mb-4">{SALE_TYPES[sale.type]}</p>
         <div class="space-y-2 text-base">
             <div>
@@ -62,7 +63,7 @@
                 <p class="font-semibold mr-1">Categories:</p>
                 <div>
                     <div class="flex flex-wrap gap-2 ml-5 max-w-[400px]">
-                        {#each sale.tags as tag}
+                        {#each sale.tags.split(',') as tag}
                             <span class="chip variant-filled">{tag}</span>
                         {/each}
                     </div>

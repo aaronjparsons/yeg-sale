@@ -48,6 +48,7 @@ const createSale = () => {
     }
 
     const setAddress = ({ address, lat, lng }: { address: string|undefined, lat: number|undefined, lng: number|undefined }) => {
+        console.warn('Setting address:', address, lat, lng);
         if (!address || !lat || !lng) {
             return
         }

@@ -43,7 +43,7 @@
 >
     <NavigationControl position="top-right" />
     {#if showMarkers}
-        {#each $Sales as sale, index}
+        {#each $Sales as sale, index (sale.id)}
             {#if sale.type === "permanent"}
                 <PermenantMarker {sale} {setCenter} {today} {index} />
             {:else}

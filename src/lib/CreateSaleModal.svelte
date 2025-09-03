@@ -1,76 +1,117 @@
 <script lang="ts">
-  import { run, preventDefault } from 'svelte/legacy';
-
+    import { run, preventDefault } from 'svelte/legacy';
     import { onMount, createEventDispatcher, onDestroy } from 'svelte';
+    import { fly } from 'svelte/transition';
+    import { createCombobox, melt } from '@melt-ui/svelte';
     import { getModalStore, Stepper, Step, getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
     import dayjs from '$lib/dayjs';
-    import { sale } from '$lib/Store';
-    import { addMarker } from './Map.svelte';
+    import { sale, Sales } from '$lib/Store';
+    // import { addMarker } from './Map.svelte';
     import { TAGS, SALE_TYPES } from './utils';
-  import { slide } from 'svelte/transition';
+    import { slide } from 'svelte/transition';
 
     let loading = $state(false);
     const modalStore = getModalStore();
     const toastStore = getToastStore();
     let hasSomeErrors = $state(false);
+    let addressOptions = $state([]);
+    let searchingPlaces = $state(false);
+    let searchState = $state<'idle' | 'searching' | 'done' | 'error'>('idle');
+
+    const {
+        elements: { menu, input, option, label },
+        states: { open, inputValue, touchedInput, selected },
+        helpers: { isSelected },
+    } = createCombobox({
+        forceVisible: true,
+        onSelectedChange: ({ curr, next }) => {
+            console.log('Selected changed:', { curr, next });
+            if (next?.value && next.value !== curr?.value) {
+                fetchAndSetAddress(next);
+            }
+            return next;
+        }
+    });
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+
+    const debounce = (callback: () => void) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(callback, 450);
+    };
+
+    const fetchAndSetAddress = async (address: any) => {
+        const response = await fetch(`/places/${address.value}`, {
+            method: 'GET',
+        });
+        if (response.ok) {
+            const result = await response.json();
+            sale.setAddress({
+                address: address.label,
+                lat: result.location.latitude,
+                lng: result.location.longitude,
+            });
+        }
+        console.warn($sale)
+    }
 
     run(() => {
-    if ($sale.days) {
-          hasSomeErrors = false;
-          for (let i = 0; i < $sale.days.length; i++) {
-              const day = $sale.days[i];
-              day.errors = [false, false, false];
+        if ($sale.days) {
+            hasSomeErrors = false;
+            for (let i = 0; i < $sale.days.length; i++) {
+                const day = $sale.days[i];
+                day.errors = [false, false, false];
 
-              // Check that day is not before the previous day
-              if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
-                  day.errors[0] = true;
-              }
+                // Check that day is not before the previous day
+                if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
+                    day.errors[0] = true;
+                }
 
-              // Check that start time is not after end time
-              if (day.startTime > day.endTime) {
-                  day.errors[1] = true;
-              }
-          }
-          hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
-      }
-  });
+                // Check that start time is not after end time
+                if (day.startTime > day.endTime) {
+                    day.errors[1] = true;
+                }
+            }
+            hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
+        }
+    });
 
     onMount(() => {
         sale.reset();
-        const center = { lat: 53.5461, lng: -113.4938 };
-        const defaultBounds = {
-            north: center.lat + 0.1,
-            south: center.lat - 0.1,
-            east: center.lng + 0.1,
-            west: center.lng - 0.1,
-        };
-        const input = document.getElementById("pac-input") as HTMLInputElement;
-        const options = {
-            bounds: defaultBounds,
-            componentRestrictions: { country: 'ca' },
-            fields: ['formatted_address', 'geometry'],
-        };
+        // const center = { lat: 53.5461, lng: -113.4938 };
+        // const defaultBounds = {
+        //     north: center.lat + 0.1,
+        //     south: center.lat - 0.1,
+        //     east: center.lng + 0.1,
+        //     west: center.lng - 0.1,
+        // };
+        // const input = document.getElementById("pac-input") as HTMLInputElement;
+        // const options = {
+        //     bounds: defaultBounds,
+        //     componentRestrictions: { country: 'ca' },
+        //     fields: ['formatted_address', 'geometry'],
+        // };
 
-        const autocomplete = new google.maps.places.Autocomplete(input, options);
-        autocomplete.addListener('place_changed', async () => {
-            const place = autocomplete.getPlace();
-            const formattedAddr = place.formatted_address?.replace(/\s[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d/, '');
+        // const autocomplete = new google.maps.places.Autocomplete(input, options);
+        // autocomplete.addListener('place_changed', async () => {
+        //     const place = autocomplete.getPlace();
+        //     const formattedAddr = place.formatted_address?.replace(/\s[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d/, '');
 
-            const data = {
-                address: formattedAddr,
-                lat: place.geometry?.location?.lat(),
-                lng: place.geometry?.location?.lng(),
-            }
+        //     const data = {
+        //         address: formattedAddr,
+        //         lat: place.geometry?.location?.lat(),
+        //         lng: place.geometry?.location?.lng(),
+        //     }
 
-            sale.setAddress(data);
-        })
+        //     sale.setAddress(data);
+        // })
     });
 
     onDestroy(() => {
-        const pacContainer = document.querySelector('.pac-container');
-        if (pacContainer) {
-            pacContainer.remove();
-        }
+        // const pacContainer = document.querySelector('.pac-container');
+        // if (pacContainer) {
+        //     pacContainer.remove();
+        // }
     })
 
     const createNewSale = async () => {
@@ -101,7 +142,9 @@
 
             if (startTime.diff(today, 'days') <= 30) {
                 // Is upcoming within 30 days, add it to data
-                addMarker(newSale);
+                Sales.update(sales => {
+                    return [newSale, ...sales];
+                });
             } else {
                 message = 'Sale was successfully created, but is currently hidden as it begins more than 30 days from now.'
             }
@@ -147,6 +190,38 @@
     const closeModal = () => {
         modalStore.close();
     }
+
+    $effect(() => {
+        if (!$open && $selected) {
+            $inputValue = $selected?.label ?? '';
+        }
+    });
+
+    $effect(() => {
+        if ($inputValue && $inputValue.length > 2) {
+            if ($inputValue === $selected?.label) {
+                return;
+            }
+            debounce(async () => {
+                searchState = 'searching';
+                const response = await fetch(`/places`, {
+                    method: 'POST',
+                    body: JSON.stringify({ input: $inputValue })
+                });
+                if (response.ok) {
+                    const results = await response.json();
+                    addressOptions = results;
+                    searchState = 'done';
+                } else {
+                    addressOptions = [];
+                    searchState = 'error';
+                }
+            });
+        } else {
+            addressOptions = [];
+            searchState = 'idle';
+        }
+    });
 </script>
 
 <div class="relative card w-modal p-4 shadow-lg">
@@ -172,13 +247,64 @@
             <label for="pac-input" class="label">
                 <span class="label-text">Address</span>
                 <input
+                    use:melt={$input}
+                    class="select select-bordered w-full p-2 {touchedInput && !inputValue ? 'input-error' : ''}"
+                    placeholder="Address"
+                />
+                <!-- <input
                     id="pac-input"
                     type="text"
                     placeholder="Enter an address"
                     class="input input-bordered p-2"
                     required
-                />
+                /> -->
             </label>
+            {#if $open}
+                <ul
+                    class="flex max-h-[300px] flex-col overflow-hidden rounded-lg"
+                    style="z-index: 1200;"
+                    use:melt={$menu}
+                    transition:fly={{ duration: 150, y: -5 }}
+                >
+                    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                    <div
+                        class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black"
+                        tabindex="0"
+                    >
+                        {#each addressOptions as address, index (index)}
+                            <li
+                                use:melt={$option({
+                                    value: address.placeId,
+                                    label: address.text,
+                                })}
+                                class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-900"
+                            >
+                                {#if $isSelected(address)}
+                                    <div class="check absolute left-2 top-1/2 z-10 text-magnum-900">
+                                    </div>
+                                {/if}
+                                <div class="pl-4">
+                                    <span class="font-medium">{address.text}</span>
+                                </div>
+                            </li>
+                        {:else}
+                            {#if searchState === 'searching'}
+                                <li
+                                    class="relative rounded-md p-2 text-gray-500"
+                                >
+                                    Searching...
+                                </li>
+                            {:else}
+                                <li
+                                    class="relative rounded-md p-2 text-gray-500"
+                                >
+                                    {searchState === 'done' ? 'No results found' : 'Type in an address...'}
+                                </li>
+                            {/if}
+                        {/each}
+                    </div>
+                </ul>
+            {/if}
         </Step>
         <Step locked={hasSomeErrors}>
             {#snippet header()}
