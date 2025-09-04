@@ -1,12 +1,10 @@
 <script lang="ts">
-    import { run, preventDefault } from 'svelte/legacy';
-    import { onMount, createEventDispatcher, onDestroy } from 'svelte';
+    import { onMount } from 'svelte';
     import { fly } from 'svelte/transition';
     import { createCombobox, melt } from '@melt-ui/svelte';
     import { getModalStore, Stepper, Step, getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
     import dayjs from '$lib/dayjs';
     import { sale, Sales } from '$lib/Store';
-    // import { addMarker } from './Map.svelte';
     import { TAGS, SALE_TYPES } from './utils';
     import { slide } from 'svelte/transition';
 
@@ -15,7 +13,6 @@
     const toastStore = getToastStore();
     let hasSomeErrors = $state(false);
     let addressOptions = $state([]);
-    let searchingPlaces = $state(false);
     let searchState = $state<'idle' | 'searching' | 'done' | 'error'>('idle');
 
     const {
@@ -55,64 +52,9 @@
         console.warn($sale)
     }
 
-    run(() => {
-        if ($sale.days) {
-            hasSomeErrors = false;
-            for (let i = 0; i < $sale.days.length; i++) {
-                const day = $sale.days[i];
-                day.errors = [false, false, false];
-
-                // Check that day is not before the previous day
-                if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
-                    day.errors[0] = true;
-                }
-
-                // Check that start time is not after end time
-                if (day.startTime > day.endTime) {
-                    day.errors[1] = true;
-                }
-            }
-            hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
-        }
-    });
-
     onMount(() => {
         sale.reset();
-        // const center = { lat: 53.5461, lng: -113.4938 };
-        // const defaultBounds = {
-        //     north: center.lat + 0.1,
-        //     south: center.lat - 0.1,
-        //     east: center.lng + 0.1,
-        //     west: center.lng - 0.1,
-        // };
-        // const input = document.getElementById("pac-input") as HTMLInputElement;
-        // const options = {
-        //     bounds: defaultBounds,
-        //     componentRestrictions: { country: 'ca' },
-        //     fields: ['formatted_address', 'geometry'],
-        // };
-
-        // const autocomplete = new google.maps.places.Autocomplete(input, options);
-        // autocomplete.addListener('place_changed', async () => {
-        //     const place = autocomplete.getPlace();
-        //     const formattedAddr = place.formatted_address?.replace(/\s[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d/, '');
-
-        //     const data = {
-        //         address: formattedAddr,
-        //         lat: place.geometry?.location?.lat(),
-        //         lng: place.geometry?.location?.lng(),
-        //     }
-
-        //     sale.setAddress(data);
-        // })
     });
-
-    onDestroy(() => {
-        // const pacContainer = document.querySelector('.pac-container');
-        // if (pacContainer) {
-        //     pacContainer.remove();
-        // }
-    })
 
     const createNewSale = async () => {
         loading = true;
@@ -222,6 +164,27 @@
             searchState = 'idle';
         }
     });
+
+    $effect(() => {
+        if ($sale.days) {
+            hasSomeErrors = false;
+            for (let i = 0; i < $sale.days.length; i++) {
+                const day = $sale.days[i];
+                day.errors = [false, false, false];
+
+                // Check that day is not before the previous day
+                if (i > 0 && dayjs(day.date).isBefore(dayjs($sale.days[i - 1].date))) {
+                    day.errors[0] = true;
+                }
+
+                // Check that start time is not after end time
+                if (day.startTime > day.endTime) {
+                    day.errors[1] = true;
+                }
+            }
+            hasSomeErrors = $sale.days.flatMap(day => day.errors).some(err => err);
+        }
+    })
 </script>
 
 <div class="relative card w-modal p-4 shadow-lg">
@@ -251,13 +214,6 @@
                     class="select select-bordered w-full p-2 {touchedInput && !inputValue ? 'input-error' : ''}"
                     placeholder="Address"
                 />
-                <!-- <input
-                    id="pac-input"
-                    type="text"
-                    placeholder="Enter an address"
-                    class="input input-bordered p-2"
-                    required
-                /> -->
             </label>
             {#if $open}
                 <ul
@@ -368,7 +324,7 @@
                     </div>
                 {/each}
             </div>
-            <button class="btn btn-sm variant-filled w-full" onclick={preventDefault(sale.addDay)}>+ Add another day</button>
+            <button class="btn btn-sm variant-filled w-full" onclick={sale.addDay}>+ Add another day</button>
             {#if hasSomeErrors}
                 <aside class="alert variant-ghost-error" transition:slide|local={{ duration: 200 }}>
                     Please ensure days are in order, and all start times are before their end times.

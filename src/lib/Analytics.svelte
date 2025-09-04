@@ -1,13 +1,11 @@
 <script lang="ts">
-    import { run } from 'svelte/legacy';
+    import { page } from '$app/state'
 
-    import { page } from '$app/stores'
-
-    run(() => {
+    $effect(() => {
         if (typeof gtag !== 'undefined') {
             gtag('config', 'G-PP096K34HN', {
                 page_title: document.title,
-                page_path: $page.url.pathname,
+                page_path: page.url.pathname,
             })
         }
     });
