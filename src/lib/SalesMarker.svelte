@@ -2,7 +2,7 @@
     import dayjs from '$lib/dayjs';
     import type { Dayjs } from 'dayjs';
     import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
-    import { SALE_TYPES } from "$lib/utils";
+    import { SALE_TYPES, MARKERS } from "$lib/utils";
     import { Sales } from '$lib/Store';
     import { Marker, Popup } from "svelte-maplibre";
     import MapMarker from '$lib/Marker.svelte';
@@ -37,7 +37,7 @@
 </script>
 
 <Marker lngLat={{ lng: sale.lng, lat: sale.lat }} class="cursor-pointer">
-    <MapMarker color={sale.active ? 'fill-green' : 'fill-yellow'} {index} />
+    <MapMarker color={sale.active ? MARKERS.active.color : MARKERS.upcoming.color} {index} />
     <Popup closeButton offset={[0, -10]} onopen={() => setCenter(sale.lat, sale.lng)}>
         <p class="text-lg font-semibold mb-4">{SALE_TYPES[sale.type]}</p>
         <div class="space-y-2 text-base">

@@ -1,7 +1,8 @@
 <script lang="ts">
     import { Marker, Popup } from 'svelte-maplibre';
-    import MapMarker from '$lib/Marker.svelte';
     import type { Dayjs } from 'dayjs';
+    import MapMarker from '$lib/Marker.svelte';
+    import { MARKERS } from '$lib/utils';
 
     let {
         sale,
@@ -19,7 +20,7 @@
 </script>
 
 <Marker lngLat={{ lng: sale.lng, lat: sale.lat }} class="cursor-pointer">
-    <MapMarker color="fill-purple" letter="M" {index} />
+    <MapMarker color={MARKERS.permanent.color} letter={MARKERS.permanent.letter} {index} />
     <Popup closeButton offset={[0, -10]} anchor="bottom" onopen={() => setCenter(sale.lat, sale.lng)}>
         <p class="text-lg font-semibold mb-4">{sale.displayName}</p>
     <div class="space-y-2 text-base">
