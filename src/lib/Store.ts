@@ -1,5 +1,6 @@
-import { writable, get } from "svelte/store";
+import { writable, get, derived } from "svelte/store";
 import dayjs from '$lib/dayjs';
+import { hasIntersection } from "./utils";
 
 export const Sales = writable<Sale[]>([]);
 
@@ -42,13 +43,12 @@ const createSale = () => {
             s.days.splice(index, 1);
             return {
                 ...s,
-                day: s.days
+                days: s.days
             }
         });
     }
 
     const setAddress = ({ address, lat, lng }: { address: string|undefined, lat: number|undefined, lng: number|undefined }) => {
-        console.warn('Setting address:', address, lat, lng);
         if (!address || !lat || !lng) {
             return
         }
@@ -109,3 +109,38 @@ const createFilters = () => {
 }
 
 export const Filters = createFilters();
+
+export const DisplayedSales = derived(
+    [Sales, Filters],
+    ([$Sales, $Filters]) => {
+        return $Sales.filter(sale => {
+            // Active
+            if ($Filters.onlyActive && !sale.active) {
+                return false;
+            }
+
+            // Type
+            if ($Filters.type) {
+                if ($Filters.type === 'market' && (sale.type === 'market' || sale.type === 'permanent')) {
+                    // Do nothing
+                } else if (sale.type !== $Filters.type) {
+                    return false;
+                }
+            }
+
+            // Tags
+            if ($Filters.tags.length) {
+                if (!sale.tags) {
+                    return false;
+                }
+
+                const saleTags = sale.tags.split(',');
+                if (!hasIntersection(saleTags, $Filters.tags)) {
+                    return false;
+                }
+            }
+
+            return true;
+        })
+    }
+);

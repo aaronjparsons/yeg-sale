@@ -4,7 +4,7 @@
     import { MapLibre, NavigationControl } from 'svelte-maplibre';
     import PermenantMarker from '$lib/PermenantMarker.svelte';
     import SalesMarker from './SalesMarker.svelte';
-    import { Sales } from '$lib/Store';
+    import { Sales, DisplayedSales, Filters } from '$lib/Store';
 
     let center = { lat: 53.5461, lng: -113.4938 }
     let zoom = 9;
@@ -23,7 +23,6 @@
             infoEl.classList.remove('maplibregl-compact-show');
             infoEl.attributes.removeNamedItem('open');
         }
-        console.warn($Sales, 'Sales data loaded from Store');
     })
 
     const today = dayjs();
@@ -43,7 +42,7 @@
 >
     <NavigationControl position="top-right" />
     {#if showMarkers}
-        {#each $Sales as sale, index (sale.id)}
+        {#each $DisplayedSales as sale, index (sale.id)}
             {#if sale.type === "permanent"}
                 <PermenantMarker {sale} {setCenter} {today} {index} />
             {:else}
@@ -52,3 +51,11 @@
         {/each}
     {/if}
 </MapLibre>
+
+{#if !$DisplayedSales.length && ($Filters.onlyActive || $Filters.type || $Filters.tags.length)}
+    <div class="absolute top-1/2 left-1/2 z-10 w-3/4 max-w-96 -translate-x-1/2 -translate-y-1/2
+        rounded-lg bg-white/90 p-6 text-center shadow-lg backdrop-blur-sm">
+        <h2 class="mb-4 text-2xl font-semibold">No sales found</h2>
+        <p class="mb-4">Try adjusting your filter options to see more sales.</p>
+    </div>
+{/if}

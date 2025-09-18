@@ -13,3 +13,5 @@ vite.config.ts.timestamp-*
 .sentryclirc
 
 /supabase
+# Sentry Config File
+.env.sentry-build-plugin

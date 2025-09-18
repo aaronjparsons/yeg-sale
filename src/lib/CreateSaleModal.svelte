@@ -1,28 +1,29 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, tick } from 'svelte';
     import { fly } from 'svelte/transition';
     import { createCombobox, melt } from '@melt-ui/svelte';
-    import { getModalStore, Stepper, Step, getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
     import dayjs from '$lib/dayjs';
+    import { addToast } from '$lib/Toast.svelte'
     import { sale, Sales } from '$lib/Store';
     import { TAGS, SALE_TYPES } from './utils';
     import { slide } from 'svelte/transition';
 
+    const { open } = $props();
+
     let loading = $state(false);
-    const modalStore = getModalStore();
-    const toastStore = getToastStore();
     let hasSomeErrors = $state(false);
     let addressOptions = $state([]);
     let searchState = $state<'idle' | 'searching' | 'done' | 'error'>('idle');
+    let stepIndex = $state(0);
+    let daysEl = $state<HTMLElement|undefined>(undefined);
 
     const {
         elements: { menu, input, option, label },
-        states: { open, inputValue, touchedInput, selected },
+        states: { open: comboboxOpen, inputValue, touchedInput, selected },
         helpers: { isSelected },
     } = createCombobox({
         forceVisible: true,
         onSelectedChange: ({ curr, next }) => {
-            console.log('Selected changed:', { curr, next });
             if (next?.value && next.value !== curr?.value) {
                 fetchAndSetAddress(next);
             }
@@ -49,7 +50,6 @@
                 lng: result.location.longitude,
             });
         }
-        console.warn($sale)
     }
 
     onMount(() => {
@@ -80,7 +80,7 @@
             // Check if newSale falls within the upcoming days constraint
             const today = dayjs();
             const startTime = dayjs(newSale.days[0].startTime);
-            let message = 'Sale successfully created';
+            let message = '';
 
             if (startTime.diff(today, 'days') <= 30) {
                 // Is upcoming within 30 days, add it to data
@@ -88,21 +88,26 @@
                     return [newSale, ...sales];
                 });
             } else {
-                message = 'Sale was successfully created, but is currently hidden as it begins more than 30 days from now.'
+                message = 'Sale is currently hidden as it begins more than 30 days from now.'
             }
 
-            const toast: ToastSettings = {
-                message,
-            };
-            toastStore.trigger(toast);
+            addToast({
+                data: {
+                    title: 'Sale created',
+                    description: message,
+                    color: 'bg-green-500',
+                }
+            })
             // Close modal
-            closeModal();
+            $open = false;
         } else {
-            const toast: ToastSettings = {
-                message: 'Error creating sale',
-                background: 'variant-filled-error',
-            };
-            toastStore.trigger(toast);
+            addToast({
+                data: {
+                    title: 'Error creating sale',
+                    description: '',
+                    color: 'bg-red-500',
+                }
+            })
         }
         loading = false;
     }
@@ -113,6 +118,15 @@
         } else {
             return dayjs().format('YYYY-MM-DD');
         }
+    }
+
+    const addDay = async () => {
+        sale.addDay();
+        await tick();
+        daysEl.scrollTo({
+            top: daysEl.scrollHeight,
+            behavior: "smooth"
+        });
     }
 
     const handleTagClicked = (tag: string) => {
@@ -134,7 +148,7 @@
     }
 
     $effect(() => {
-        if (!$open && $selected) {
+        if (!$comboboxOpen && $selected) {
             $inputValue = $selected?.label ?? '';
         }
     });
@@ -187,164 +201,186 @@
     })
 </script>
 
-<div class="relative card w-modal p-4 shadow-lg">
-    <div class="flex justify-end">
-        <button class="btn-icon btn-icon-sm" onclick={closeModal}>
-            ✕
+{#if stepIndex === 0}
+    <p class="text-lg font-semibold mb-2">Add your upcoming sale to the map!</p>
+    <label for="sale-type" class="label">
+        <span class="label-text">Sale Type</span>
+        <select bind:value={$sale.type} id="sale-type" class="primary-select w-full">
+            {#each Object.entries(SALE_TYPES) as [key, value]}
+                <option value={key}>{value}</option>
+            {/each}
+        </select>
+    </label>
+    <label for="pac-input" class="label">
+        <span class="label-text">Address</span>
+        <input
+            use:melt={$input}
+            class="primary-select w-full p-2 {touchedInput && !inputValue ? 'input-error' : ''}"
+            placeholder="Start typing an address"
+        />
+    </label>
+    {#if $comboboxOpen && addressOptions.length}
+        <ul
+            class="flex max-h-[300px] flex-col overflow-hidden shadow-md rounded-lg border border-primary"
+            style="z-index: 1200;"
+            use:melt={$menu}
+            transition:fly={{ duration: 150, y: -5 }}
+        >
+            <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+            <div
+                class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white text-black"
+                tabindex="0"
+            >
+                {#each addressOptions as address, index (index)}
+                    <li
+                        use:melt={$option({
+                            value: address.placeId,
+                            label: address.text,
+                        })}
+                        class="text-sm cursor-pointer scroll-my-2 py-1 px-2 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-900"
+                        class:bg-gray-300={$isSelected(address.placeId)}
+                    >
+                        <span>{address.text}</span>
+                    </li>
+                {:else}
+                    {#if searchState === 'searching'}
+                        <li
+                            class="relative rounded-md p-2 text-gray-500"
+                        >
+                            Searching...
+                        </li>
+                    {:else}
+                        <li
+                            class="relative rounded-md p-2 text-gray-500"
+                        >
+                            {searchState === 'done' ? 'No results found' : 'Type in an address...'}
+                        </li>
+                    {/if}
+                {/each}
+            </div>
+        </ul>
+    {/if}
+    <div class="flex justify-between mt-6">
+        <button
+            class="secondary-button"
+            onclick={() => $open = false}
+        >
+            Cancel
+        </button>
+        <button
+            class="primary-button"
+            disabled={!Boolean($sale.address.length)}
+            onclick={() => stepIndex = 1}
+        >
+            Next
         </button>
     </div>
-
-    <Stepper on:complete={onCompleteHandler}>
-        <Step locked={!Boolean($sale.address.length)}>
-            {#snippet header()}
-            Add your upcoming sale to the map!
-          {/snippet}
-            <label for="sale-type" class="label">
-                <span class="label-text">Sale Type</span>
-                <select bind:value={$sale.type} id="sale-type" class="select select-bordered w-full">
-                    {#each Object.entries(SALE_TYPES) as [key, value]}
-                        <option value={key}>{value}</option>
-                    {/each}
-                </select>
-            </label>
-            <label for="pac-input" class="label">
-                <span class="label-text">Address</span>
-                <input
-                    use:melt={$input}
-                    class="select select-bordered w-full p-2 {touchedInput && !inputValue ? 'input-error' : ''}"
-                    placeholder="Address"
-                />
-            </label>
-            {#if $open}
-                <ul
-                    class="flex max-h-[300px] flex-col overflow-hidden rounded-lg"
-                    style="z-index: 1200;"
-                    use:melt={$menu}
-                    transition:fly={{ duration: 150, y: -5 }}
-                >
-                    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-                    <div
-                        class="flex max-h-full flex-col gap-0 overflow-y-auto bg-white px-2 py-2 text-black"
-                        tabindex="0"
-                    >
-                        {#each addressOptions as address, index (index)}
-                            <li
-                                use:melt={$option({
-                                    value: address.placeId,
-                                    label: address.text,
-                                })}
-                                class="relative cursor-pointer scroll-my-2 rounded-md py-2 pl-4 pr-4 data-[highlighted]:bg-gray-200 data-[highlighted]:text-gray-900"
-                            >
-                                {#if $isSelected(address)}
-                                    <div class="check absolute left-2 top-1/2 z-10 text-magnum-900">
-                                    </div>
-                                {/if}
-                                <div class="pl-4">
-                                    <span class="font-medium">{address.text}</span>
-                                </div>
-                            </li>
-                        {:else}
-                            {#if searchState === 'searching'}
-                                <li
-                                    class="relative rounded-md p-2 text-gray-500"
-                                >
-                                    Searching...
-                                </li>
-                            {:else}
-                                <li
-                                    class="relative rounded-md p-2 text-gray-500"
-                                >
-                                    {searchState === 'done' ? 'No results found' : 'Type in an address...'}
-                                </li>
-                            {/if}
-                        {/each}
+{:else if stepIndex === 1}
+    <p class="text-lg font-semibold mb-2">Days and time</p>
+    <div bind:this={daysEl} class="overflow-auto max-h-56">
+        {#each $sale.days as day, index (index)}
+            <div class="flex items-center space-x-2 mb-2">
+                <div class="relative">
+                    {#if index === 0}
+                        <label for="day" class="block">
+                            <span class="label-text">Day</span>
+                        </label>
+                    {/if}
+                    <input
+                        bind:value={day.date}
+                        class="primary-select sm:max-w-full max-w-28 p-2 {day.errors[0] ? 'input-error' : ''}"
+                        type="date"
+                        min={getMinDate(index)}
+                        max={dayjs().add(1, 'years').format('YYYY-MM-DD')}
+                    />
+                </div>
+                <div class="relative w-24">
+                    {#if index === 0}
+                        <label for="start-time" class="block">
+                            <span class="label-text">Start time</span>
+                        </label>
+                    {/if}
+                    <input
+                        bind:value={day.startTime}
+                        class="primary-select w-full p-2 {day.errors[1] ? 'input-error' : ''}"
+                        type="time"
+                        max={day.endTime}
+                    />
+                </div>
+                <div class="relative w-24">
+                    {#if index === 0}
+                        <label for="end-time" class="block">
+                            <span class="label-text">End time</span>
+                        </label>
+                    {/if}
+                    <input
+                        bind:value={day.endTime}
+                        class="primary-select w-full p-2 {day.errors[2] ? 'input-error' : ''}"
+                        type="time"
+                        min={day.startTime}
+                    />
+                </div>
+                {#if index > 0}
+                    <div class="flex-shrink-0">
+                        <button
+                            class="w-6 h-6 rounded-full bg-red-500 text-white"
+                            onclick={() => sale.removeDay(index)}
+                        >
+                            ✕
+                        </button>
                     </div>
-                </ul>
-            {/if}
-        </Step>
-        <Step locked={hasSomeErrors}>
-            {#snippet header()}
-            Days and time
-          {/snippet}
-            <div class="overflow-x-auto">
-                {#each $sale.days as day, index (index)}
-                    <div class="flex items-center space-x-4 mb-2">
-                        <div class="flex-grow">
-                            {#if index === 0}
-                                <label for="day" class="label">
-                                    <span class="label-text">Day</span>
-                                </label>
-                            {/if}
-                            <input
-                                bind:value={day.date}
-                                class="date-input input input-bordered p-2 {day.errors[0] ? 'input-error' : ''}"
-                                type="date"
-                                min={getMinDate(index)}
-                                max={dayjs().add(1, 'years').format('YYYY-MM-DD')}
-                            />
-                        </div>
-                        <div class="flex-grow">
-                            {#if index === 0}
-                                <label for="start-time" class="label">
-                                    <span class="label-text">Start time</span>
-                                </label>
-                            {/if}
-                            <input
-                                bind:value={day.startTime}
-                                class="input input-bordered p-2 {day.errors[1] ? 'input-error' : ''}"
-                                type="time"
-                                max={day.endTime}
-                            />
-                        </div>
-                        <div class="flex-grow">
-                            {#if index === 0}
-                                <label for="end-time" class="label">
-                                    <span class="label-text">End time</span>
-                                </label>
-                            {/if}
-                            <input
-                                bind:value={day.endTime}
-                                class="input input-bordered p-2 {day.errors[2] ? 'input-error' : ''}"
-                                type="time"
-                                min={day.startTime}
-                            />
-                        </div>
-                        {#if index > 0}
-                            <div class="flex-shrink-0">
-                                <button
-                                    class="btn-icon btn-icon-sm variant-filled-error text-white"
-                                    onclick={() => sale.removeDay(index)}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        {:else}
-                            <span class="w-[33px]"></span>
-                        {/if}
-                    </div>
-                {/each}
+                {:else}
+                    <span class="w-[33px]"></span>
+                {/if}
             </div>
-            <button class="btn btn-sm variant-filled w-full" onclick={sale.addDay}>+ Add another day</button>
-            {#if hasSomeErrors}
-                <aside class="alert variant-ghost-error" transition:slide|local={{ duration: 200 }}>
-                    Please ensure days are in order, and all start times are before their end times.
-                </aside>
-            {/if}
-        </Step>
-        <Step locked={loading || !$sale.tags.length}>
-            {#snippet header()}
-            Add categories
-          {/snippet}
-            <div class="flex flex-wrap gap-2">
-                {#each TAGS as tag}
-                    <span
-                        class="chip {$sale.tags.includes(tag) ? 'variant-filled' : 'variant-ghost'}"
-                        onclick={() => handleTagClicked(tag)}
-                    >
-                        {tag}
-                    </span>
-                {/each}
-            </div>
-        </Step>
-    </Stepper>
-</div>
+        {/each}
+    </div>
+    <button class="primary-button w-full text-sm" onclick={addDay}>+ Add another day</button>
+    {#if hasSomeErrors}
+        <aside class="mt-2 p-4 rounded-md border border-red-500 bg-red-100" transition:slide|local={{ duration: 200 }}>
+            Please ensure days are in order, and all start times are before their end times.
+        </aside>
+    {/if}
+    <div class="flex justify-between mt-6">
+        <button
+            class="secondary-button"
+            onclick={() => stepIndex = 0}
+        >
+            Back
+        </button>
+        <button
+            class="primary-button"
+            disabled={hasSomeErrors}
+            onclick={() => stepIndex = 2}
+        >
+            Next
+        </button>
+    </div>
+{:else}
+    <p class="text-lg font-semibold mb-2">Add categories</p>
+    <div class="flex flex-wrap gap-2">
+        {#each TAGS as tag}
+            <span
+                class="{$sale.tags.includes(tag) ? 'bg-primary text-white' : 'bg-gray-200'} text-xs rounded py-1 px-2 cursor-pointer"
+                onclick={() => handleTagClicked(tag)}
+            >
+                {tag}
+            </span>
+        {/each}
+    </div>
+    <div class="flex justify-between mt-6">
+        <button
+            class="secondary-button"
+            onclick={() => stepIndex = 1}
+        >
+            Back
+        </button>
+        <button
+            class="primary-button"
+            disabled={loading || !$sale.tags.length}
+            onclick={onCompleteHandler}
+        >
+            { loading ? 'Creating...' : 'Create sale' }
+        </button>
+    </div>
+{/if}

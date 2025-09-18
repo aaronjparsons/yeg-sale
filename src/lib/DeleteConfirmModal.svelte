@@ -1,55 +1,56 @@
 <script lang="ts">
-    import { getToastStore, getModalStore, type ToastSettings } from '@skeletonlabs/skeleton';
+    import { addToast } from '$lib/Toast.svelte'
+    import { Sales } from '$lib/Store';
 
-    const modalStore = getModalStore();
-    const toastStore = getToastStore();
+    const { id, open } = $props();
+
     let deleting = $state(false);
 
     const handleDelete = async () => {
         deleting = true;
-        const id = $modalStore[0].meta.id;
         const response = await fetch(`/sales/${id}`, {
             method: 'DELETE'
         });
 
         if (response.ok) {
-            const toast: ToastSettings = {
-                message: 'Sale deleted',
-            };
-            toastStore.trigger(toast);
-            $modalStore[0].meta.onDelete();
+            addToast({
+                data: {
+                    title: 'Sale deleted',
+                    description: '',
+                    color: 'bg-green-500',
+                }
+            })
+            Sales.update(sales => sales.filter(sale => sale.id !== id));
             closeModal();
         } else {
-            const toast: ToastSettings = {
-                message: 'Error deleting sale',
-                background: 'variant-filled-error',
-            };
-            toastStore.trigger(toast);
+            addToast({
+                data: {
+                    title: 'Error deleting sale',
+                    description: 'Please try again',
+                    color: 'bg-red-500',
+                }
+            })
         }
         deleting = false;
     }
 
     const closeModal = () => {
-        modalStore.close();
+        $open = false;
     }
 </script>
 
-<div class="relative card w-modal p-4 shadow-lg">
-    <div class="flex justify-between mb-4">
-        <p class="font-semibold text-2xl">Confirm delete</p>
-        <button class="btn-icon btn-icon-sm" onclick={closeModal}>
-            ✕
+<div class="space-y-4">
+    <p>Are you sure you want to delete this sale?</p>
+    <div class="flex justify-end">
+        <button class="secondary-button mr-2" onclick={closeModal}>
+            Cancel
         </button>
-    </div>
-    <div class="space-y-4">
-        <p>Are you sure you want to delete this sale?</p>
-        <div class="flex justify-end">
-            <button class="btn variant-filled-error mr-2" disabled={deleting} onclick={handleDelete}>
-                {deleting ? 'Deleting...' : 'Delete'}
-            </button>
-            <button class="btn variant-filled" onclick={closeModal}>
-                Cancel
-            </button>
-        </div>
+        <button
+            class="rounded-xl bg-red-500 text-white px-4 py-3 leading-none hover:bg-red-400 transition-all duration-75 disabled:opacity-70 disabled:cursor-not-allowed;"
+            disabled={deleting}
+            onclick={handleDelete}
+        >
+            {deleting ? 'Deleting...' : 'Delete'}
+        </button>
     </div>
 </div>

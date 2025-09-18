@@ -15,8 +15,6 @@
   "devDependencies": {
     "@melt-ui/pp": "^0.3.2",
     "@melt-ui/svelte": "^0.86.6",
-    "@skeletonlabs/skeleton": "^2.7.0",
-    "@skeletonlabs/tw-plugin": "^0.3.1",
     "@sveltejs/adapter-auto": "^3.0.0",
     "@sveltejs/kit": "^2.37.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
@@ -38,9 +36,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@googlemaps/js-api-loader": "^1.16.6",
     "@prisma/client": "^5.1.1",
-    "@sentry/sveltekit": "^7.105.0",
+    "@sentry/sveltekit": "^10.10.0",
     "dayjs": "^1.11.9",
     "svelte-maplibre": "^1.2.1",
     "uuid": "^9.0.1"

@@ -76,7 +76,7 @@ async function main() {
             lat: 53.5022,
             lng: -113.628,
             type: 'permanent',
-            link: 'https://www.callingwoodmarketplace.com/farmers-market/',
+            link: 'https://www.callingwoodfarmersmarket.com/',
             open: 'June - September (Wednesday),May - October (Sunday)',
             days: 'Wednesday: 12:00 pm - 4:00 pm,Sunday: 10:00 am - 3:00 pm'
         },

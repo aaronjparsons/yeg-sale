@@ -30,25 +30,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     background: transparent;
 }
 
-/* infowindow */
-.gm-style-iw {
-    padding: 12px !important;
-}
-
-.gm-style-iw-d {
-    overflow: auto !important;
-}
-
-/* infowindow close button */
-button.gm-ui-hover-effect {
-    right: 0px !important;
-
-    span {
-        width: 20px !important;
-        height: 20px !important;
-    }
-}
-
 @keyframes dropIn {
   0% {
     opacity: 0;
@@ -78,7 +59,39 @@ button.gm-ui-hover-effect {
 }
 
 .maplibregl-popup-close-button {
+    padding: 0.5rem;
+    border-radius: 6px !important;
     font-size: 32px;
     top: 5px !important;
-    right: 10px !important;
+    right: 6px !important;
+}
+
+select:focus, input:focus {
+  @apply outline outline-2 outline-slate-300;
+}
+
+.primary-button {
+  height: 40px;
+  @apply rounded-xl bg-primary text-white px-4 py-3 leading-none hover:bg-primary-light transition-all duration-75 disabled:opacity-70 disabled:cursor-not-allowed;
+}
+
+.round-button {
+  @apply rounded-full w-14 h-14 bg-primary text-white px-4 py-3 leading-none hover:bg-primary-light transition-all duration-75 disabled:opacity-70 disabled:cursor-not-allowed;
+}
+
+.secondary-button {
+  height: 40px;
+  @apply box-border rounded-xl text-primary bg-white px-4 py-2.5 leading-none border-2 border-primary disabled:opacity-70 disabled:cursor-not-allowed hover:outline-primary-light hover:text-primary-light transition-all duration-75;
+}
+
+.primary-select {
+  @apply p-2 bg-white rounded-md border border-primary;
+}
+
+.primary-select option {
+  @apply px-2 py-1;
+}
+
+.primary-select option:checked {
+  @apply bg-primary text-white;
 }
