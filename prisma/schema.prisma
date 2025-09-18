@@ -44,4 +44,21 @@ model Markets {
   link            String    @db.VarChar(255)
   open            String    @db.VarChar(255)
   days            String    @db.VarChar(255)
+  reports         MarketReports[]
 }
+
+model MarketReports {
+  id              Int       @default(autoincrement()) @id
+  createdAt       DateTime  @default(now())
+  market          Markets   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  marketId        Int
+  message         String    @db.Text
+
+  @@index([marketId])
+}
+
+// model Feedback {
+//   id              Int       @default(autoincrement()) @id
+//   createdAt       DateTime  @default(now())
+//   message         String    @db.Text
+// }

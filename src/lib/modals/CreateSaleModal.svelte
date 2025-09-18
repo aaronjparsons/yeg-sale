@@ -5,7 +5,7 @@
     import dayjs from '$lib/dayjs';
     import { addToast } from '$lib/Toast.svelte'
     import { sale, Sales } from '$lib/Store';
-    import { TAGS, SALE_TYPES } from './utils';
+    import { TAGS, SALE_TYPES } from '$lib/utils';
     import { slide } from 'svelte/transition';
 
     const { open } = $props();

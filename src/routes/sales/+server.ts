@@ -55,6 +55,7 @@ export const GET = async ({ cookies }) => {
         }
 
         for (const market of markets) {
+            market.baseId = market.id;
             market.id = `market-${market.id}`;
             if (market.days.includes(dayOfWeek)) {
                 market.active = true;

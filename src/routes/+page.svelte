@@ -3,9 +3,9 @@
     import MapLibre from '$lib/MapLibre.svelte';
     import ModalButton from '$lib/ModalButton.svelte';
     import { Sales, Filters } from '$lib/Store';
-    import CreateSaleModal from '$lib/CreateSaleModal.svelte';
-    import LegendModal from '$lib/LegendModal.svelte';
-    import OptionsModal from '$lib/OptionsModal.svelte';
+    import CreateSaleModal from '$lib/modals/CreateSaleModal.svelte';
+    import LegendModal from '$lib/modals/LegendModal.svelte';
+    import OptionsModal from '$lib/modals/OptionsModal.svelte';
 
     let { data = {
         sales: [],

@@ -3,7 +3,7 @@
     import dayjs from '$lib/dayjs';
     import type { Dayjs } from 'dayjs';
     import { createDialog, melt } from "@melt-ui/svelte";
-    import DeleteConfirmModal from './DeleteConfirmModal.svelte';
+    import DeleteConfirmModal from './modals/DeleteConfirmModal.svelte';
     import { SALE_TYPES, MARKERS } from "$lib/utils";
     import { Sales } from '$lib/Store';
     import { Marker, Popup } from "svelte-maplibre";
@@ -81,7 +81,7 @@
 </Marker>
 
 {#if $open}
-    <div class="" use:melt={$portalled}>
+    <div use:melt={$portalled}>
         <div
             use:melt={$overlay}
             class="fixed inset-0 bg-black/50"

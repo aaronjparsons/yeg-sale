@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createSwitch, melt } from '@melt-ui/svelte';
-    import { TAGS, SALE_TYPES } from './utils';
-    import { Filters } from './Store';
+    import { TAGS, SALE_TYPES } from '$lib/utils';
+    import { Filters } from '$lib/Store';
 
     let localFilters = $state({...$Filters});
 
