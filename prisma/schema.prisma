@@ -56,9 +56,3 @@ model MarketReports {
 
   @@index([marketId])
 }
-
-// model Feedback {
-//   id              Int       @default(autoincrement()) @id
-//   createdAt       DateTime  @default(now())
-//   message         String    @db.Text
-// }
